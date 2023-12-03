@@ -5,6 +5,7 @@ const ACCEPTED_IMAGE_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png'];
 const ACCEPTED_IMAGE_TYPES = ['jpeg', 'jpg', 'png'];
 
 export const createWajibPajakOrangPribadiValidation = z.object({
+  kodeWPOP: z.string().max(50),
   nama: z.string().max(100).min(1),
   email: z.string().max(200).email(),
   password: z.string().max(255).optional(),
@@ -20,32 +21,35 @@ export const createWajibPajakOrangPribadiValidation = z.object({
   namaRekening: z.string().max(100).optional(),
   nip: z.string().max(50).optional(),
   statusPegawai: z.string().max(30),
-  fileFotoNpwp: z
-    .any()
-    .refine((files) => {
-      return files?.[0]?.size <= MAX_FILE_SIZE;
-    }, `Max image size is 5MB.`)
-    .refine(
-      (files) => ACCEPTED_IMAGE_MIME_TYPES.includes(files?.[0]?.type),
-      'Only .jpg, .jpeg, and .png formats are supported.'
-    ),
-  fileFotoIdOrangPribadi: z
-    .any()
-    .refine((files) => {
-      return files?.[0]?.size <= MAX_FILE_SIZE;
-    }, `Max image size is 5MB.`)
-    .refine(
-      (files) => ACCEPTED_IMAGE_MIME_TYPES.includes(files?.[0]?.type),
-      'Only .jpg, .jpeg, and .png formats are supported.'
-    ),
-  fileFotoBuktiRekening: z
-    .any()
-    .refine((files) => {
-      return files?.[0]?.size <= MAX_FILE_SIZE;
-    }, `Max image size is 5MB.`)
-    .refine(
-      (files) => ACCEPTED_IMAGE_MIME_TYPES.includes(files?.[0]?.type),
-      'Only .jpg, .jpeg, and .png formats are supported.'
-    ),
+  fileFotoNpwp: z.string().max(255),
+  fileFotoIdOrangPribadi: z.string().max(255),
+  fileFotoBuktiRekening: z.string().max(255),
+  // fileFotoNpwp: z
+  //   .any()
+  //   .refine((files) => {
+  //     return files?.[0]?.size <= MAX_FILE_SIZE;
+  //   }, `Max image size is 5MB.`)
+  //   .refine(
+  //     (files) => ACCEPTED_IMAGE_MIME_TYPES.includes(files?.[0]?.type),
+  //     'Only .jpg, .jpeg, and .png formats are supported.'
+  //   ),
+  // fileFotoIdOrangPribadi: z
+  //   .any()
+  //   .refine((files) => {
+  //     return files?.[0]?.size <= MAX_FILE_SIZE;
+  //   }, `Max image size is 5MB.`)
+  //   .refine(
+  //     (files) => ACCEPTED_IMAGE_MIME_TYPES.includes(files?.[0]?.type),
+  //     'Only .jpg, .jpeg, and .png formats are supported.'
+  //   ),
+  // fileFotoBuktiRekening: z
+  //   .any()
+  //   .refine((files) => {
+  //     return files?.[0]?.size <= MAX_FILE_SIZE;
+  //   }, `Max image size is 5MB.`)
+  //   .refine(
+  //     (files) => ACCEPTED_IMAGE_MIME_TYPES.includes(files?.[0]?.type),
+  //     'Only .jpg, .jpeg, and .png formats are supported.'
+  //   ),
   isApproved: z.boolean(),
 });

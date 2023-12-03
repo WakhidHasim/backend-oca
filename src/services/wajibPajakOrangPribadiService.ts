@@ -12,6 +12,7 @@ export const createWajibPajakOrangPribadi = async (
 ) => {
   const createWajibPajakOrangPribadiMap =
     createWajibPajakOrangPribadiValidation.parse({
+      kodeWPOP: data.kode_wpop,
       nama: data.nama,
       email: data.email,
       kewarganegaraan: data.kewarganegaraan,
@@ -28,12 +29,20 @@ export const createWajibPajakOrangPribadi = async (
       fileFotoNpwp: data.file_foto_npwp,
       fileFotoIdOrangPribadi: data.file_foto_id_orang_pribadi,
       fileFotoBuktiRekening: data.file_foto_bukti_rekening,
-      isApproved: data.is_approved,
+      isApproved: true,
     });
+
+  const date = new Date();
+  const shortYear = date.getFullYear();
+  const twoDigitYear = shortYear.toString().substr(-2);
+
+  let number = 0;
+  const generateKodeWPOP = 'OP' + twoDigitYear + '0000' + number++;
 
   const createWajibPajakOrangPribadi =
     await prisma.wajibPajakOrangPribadi.create({
       data: {
+        kodeWPOP: generateKodeWPOP,
         nama: createWajibPajakOrangPribadiMap.nama,
         email: createWajibPajakOrangPribadiMap.email,
         kewarganegaraan: createWajibPajakOrangPribadiMap.kewarganegaraan,

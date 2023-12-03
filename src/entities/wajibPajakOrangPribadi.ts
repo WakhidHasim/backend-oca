@@ -10,6 +10,7 @@ enum StatusPegawai {
 }
 
 export type WajibPajakOrangPribadi = {
+  kode_wpop: string;
   nama: string;
   email: string;
   password?: string;
