@@ -1,4 +1,5 @@
 import { prisma } from '../config/database';
+import BadRequestError from '../error/BadRequestError';
 
 import { WajibPajakOrangPribadi } from '../entities/wajibPajakOrangPribadi';
 import { createWajibPajakOrangPribadiValidation } from '../validation/wajibPajakOrangPribadiValidation';
@@ -10,8 +11,8 @@ type CreateWajibPajakOrangPribadiParams = Omit<
 export const createWajibPajakOrangPribadi = async (
   data: CreateWajibPajakOrangPribadiParams
 ) => {
-  const createWajibPajakOrangPribadiMap =
-    createWajibPajakOrangPribadiValidation.parse({
+  const validator =
+    createWajibPajakOrangPribadiValidation.safeParse({
       kodeWPOP: data.kode_wpop,
       nama: data.nama,
       email: data.email,
@@ -32,6 +33,10 @@ export const createWajibPajakOrangPribadi = async (
       isApproved: true,
     });
 
+  if (!validator.success) throw new BadRequestError(validator.error.message)
+
+  const requestBody = validator.data
+
   const date = new Date();
   const shortYear = date.getFullYear();
   const twoDigitYear = shortYear.toString().substr(-2);
@@ -43,25 +48,25 @@ export const createWajibPajakOrangPribadi = async (
     await prisma.wajibPajakOrangPribadi.create({
       data: {
         kodeWPOP: generateKodeWPOP,
-        nama: createWajibPajakOrangPribadiMap.nama,
-        email: createWajibPajakOrangPribadiMap.email,
-        kewarganegaraan: createWajibPajakOrangPribadiMap.kewarganegaraan,
-        namaNegara: createWajibPajakOrangPribadiMap.namaNegara,
-        idOrangPribadi: createWajibPajakOrangPribadiMap.idOrangPribadi,
-        namaKtp: createWajibPajakOrangPribadiMap.namaKtp,
-        npwp: createWajibPajakOrangPribadiMap.npwp,
-        namaNpwp: createWajibPajakOrangPribadiMap.namaNpwp,
-        kotaNpwp: createWajibPajakOrangPribadiMap.kotaNpwp,
-        bankTransfer: createWajibPajakOrangPribadiMap.bankTransfer,
-        noRekening: createWajibPajakOrangPribadiMap.noRekening,
-        namaRekening: createWajibPajakOrangPribadiMap.namaRekening,
-        nip: createWajibPajakOrangPribadiMap.nip,
-        statusPegawai: createWajibPajakOrangPribadiMap.statusPegawai,
-        fileFotoNpwp: createWajibPajakOrangPribadiMap.fileFotoNpwp,
+        nama: requestBody.nama,
+        email: requestBody.email,
+        kewarganegaraan: requestBody.kewarganegaraan,
+        namaNegara: requestBody.namaNegara,
+        idOrangPribadi: requestBody.idOrangPribadi,
+        namaKtp: requestBody.namaKtp,
+        npwp: requestBody.npwp,
+        namaNpwp: requestBody.namaNpwp,
+        kotaNpwp: requestBody.kotaNpwp,
+        bankTransfer: requestBody.bankTransfer,
+        noRekening: requestBody.noRekening,
+        namaRekening: requestBody.namaRekening,
+        nip: requestBody.nip,
+        statusPegawai: requestBody.statusPegawai,
+        fileFotoNpwp: requestBody.fileFotoNpwp,
         fileFotoIdOrangPribadi:
-          createWajibPajakOrangPribadiMap.fileFotoIdOrangPribadi,
+          requestBody.fileFotoIdOrangPribadi,
         fileFotoBuktiRekening:
-          createWajibPajakOrangPribadiMap.fileFotoBuktiRekening,
+          requestBody.fileFotoBuktiRekening,
         statusWpop: true,
       },
     });

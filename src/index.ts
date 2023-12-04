@@ -7,6 +7,7 @@ import wajibPajakOrangPribadiRoutes from './routes/wajibPajakOrangPribadiRoutes'
 const app = express();
 const PORT = 3000;
 
+app.use(express.json())
 app.use(validationErrorHandler);
 
 app.use('/wajib-pajak-orang-pribadi', wajibPajakOrangPribadiRoutes);

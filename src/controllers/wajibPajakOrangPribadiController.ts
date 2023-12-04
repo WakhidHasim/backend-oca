@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import * as wajibPajakOrangPribadiService from '../services/wajibPajakOrangPribadiService';
+import HttpError from '../error/HttpError';
 
 export const createWajibPajakOrangPribadi = async (
   req: Request,
@@ -17,7 +18,13 @@ export const createWajibPajakOrangPribadi = async (
       },
       result: wajibPajakOrangPribadi,
     });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error) {
+    if (error instanceof HttpError) {
+      return res.status(error.statusCode).json({ message: error.message })
+    }
+
+    const e = error as Error
+    console.log(e)
+    res.status(500).json({ error: e.message });
   }
 };
