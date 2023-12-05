@@ -1,5 +1,8 @@
+// errorMiddleware.ts
+
 import { NextFunction, Request, Response } from 'express';
 import { ZodError } from 'zod';
+import HttpError from '../error/HttpError';
 
 export const validationErrorHandler = (
   error: ZodError | any,
@@ -9,18 +12,10 @@ export const validationErrorHandler = (
 ) => {
   if (error instanceof ZodError) {
     const errorMessage = error.errors.map((err) => err.message).join(', ');
-    res.status(400).json({ error: errorMessage });
+    return res.status(400).json({ error: errorMessage });
+  } else if (error instanceof HttpError) {
+    return res.status(error.statusCode).json({ error: error.message });
   } else {
-    if (!error) {
-      next();
-      return;
-    }
-
-    res
-      .status(500)
-      .json({
-        errors: error.message,
-      })
-      .end();
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 };

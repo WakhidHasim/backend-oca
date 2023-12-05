@@ -171,7 +171,6 @@ model WajibPajakOrangPribadi {
   password                     String?                        @db.VarChar(255)
   kewarganegaraan              String                         @db.VarChar(5)
   namaNegara                   String                         @map("nama_negara") @db.VarChar(100)
-  negara                       Negara                         @relation(fields: [namaNegara], references: [namaNegara])
   idOrangPribadi               String                         @map("id_orang_pribadi") @db.VarChar(30)
   namaKtp                      String                         @map("nama_ktp") @db.VarChar(100)
   npwp                         String?                        @db.VarChar(30)
@@ -188,6 +187,8 @@ model WajibPajakOrangPribadi {
   isApproved                   Boolean                        @default(false) @map("is_approved") @db.Boolean
   ItemKegiatanPenghasilanOP    ItemKegiatanPenghasilanOP[]
   LogItemKegiatanPenghasilanOP LogItemKegiatanPenghasilanOP[]
+  Negara                       Negara?                        @relation(fields: [negaraKodeNegara], references: [kodeNegara])
+  negaraKodeNegara             String?                        @db.VarChar(5)
 
   @@map("wajib_pajak_orang_pribadi")
 }
