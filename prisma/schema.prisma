@@ -33,7 +33,7 @@ model JenisPajak {
 
 model BankTransfer {
   kodeBank Int    @id @map("kode_bank") @db.Integer
-  namaBank String @unique @map("nama_bank") @db.VarChar(50)
+  namaBank String @unique @map("nama_bank") @db.VarChar(100)
 
   @@map("bank_transfer")
 }

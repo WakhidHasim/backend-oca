@@ -14,17 +14,29 @@ export const createWajibPajakOrangPribadi = async (
     res.json({
       status: {
         code: 200,
-        description: 'OK',
+        description: 'Data Wajib Pajak Orang Pribadi berhasil ditambahkan !',
       },
       result: wajibPajakOrangPribadi,
     });
   } catch (error) {
     if (error instanceof HttpError) {
-      return res.status(error.statusCode).json({ message: error.message })
+      return res.status(error.statusCode).json({
+        status: {
+          code: error.statusCode,
+          description: error.message,
+        },
+        result: null,
+      });
     }
 
-    const e = error as Error
-    console.log(e)
-    res.status(500).json({ error: e.message });
+    const e = error as Error;
+    console.log(e);
+    res.status(500).json({
+      status: {
+        code: 500,
+        description: e.message,
+      },
+      result: null,
+    });
   }
 };
