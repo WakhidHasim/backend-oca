@@ -5,6 +5,7 @@ import { validationErrorHandler } from './middleware/errorMiddleware';
 import bankRoutes from './routes/bankRoutes';
 import negaraRoutes from './routes/negaraRoutes';
 import wajibPajakOrangPribadiRoutes from './routes/wajibPajakOrangPribadiRoutes';
+import uploadRoutes from "./routes/uploadRoute"
 
 const app = express();
 const PORT = 3000;
@@ -15,6 +16,7 @@ app.use(validationErrorHandler);
 app.use('/api/bank', bankRoutes);
 app.use('/api/negara', negaraRoutes);
 app.use('/api/wajib-pajak-orang-pribadi', wajibPajakOrangPribadiRoutes);
+app.use("/api/upload", uploadRoutes)
 
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
