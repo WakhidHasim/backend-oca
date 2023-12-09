@@ -12,7 +12,7 @@ datasource db {
 
 model Negara {
   kodeNegara             String                   @id @map("kode_negara") @db.VarChar(5)
-  namaNegara             String                   @unique @map("nama_negara") @db.VarChar(100)
+  namaNegara             String                   @map("nama_negara") @db.VarChar(100)
   WajibPajakOrangPribadi WajibPajakOrangPribadi[]
 
   @@map("negara")
@@ -42,9 +42,9 @@ model Pegawai {
   nip                          String                        @id @unique @db.VarChar(50)
   nama                         String                        @db.VarChar(100)
   email                        String                        @unique @db.VarChar(200)
-  nik                          String                        @unique @db.VarChar(50)
+  nik                          String                        @db.VarChar(50)
   namaKtp                      String                        @map("nama_ktp") @db.VarChar(100)
-  npwp                         String                        @unique @db.VarChar(30)
+  npwp                         String                        @db.VarChar(30)
   namaNpwp                     String                        @map("nama_npwp") @db.VarChar(100)
   jenkel                       String                        @db.VarChar(20)
   statusNikah                  String                        @map("status_nikah") @db.VarChar(30)
@@ -179,7 +179,7 @@ model WajibPajakOrangPribadi {
   bankTransfer                 String?                        @map("bank_transfer") @db.VarChar(50)
   noRekening                   String?                        @map("no_rekening") @db.VarChar(30)
   namaRekening                 String?                        @map("nama_rekening") @db.VarChar(100)
-  nip                          String?                        @unique @db.VarChar(50)
+  nip                          String?                        @db.VarChar(50)
   statusPegawai                String                         @map("status_pegawai") @db.VarChar(30)
   fileFotoNpwp                 String?                        @map("file_foto_npwp") @db.VarChar(255)
   fileFotoIdOrangPribadi       String                         @map("file_foto_id_orang_pribadi") @db.VarChar(255)

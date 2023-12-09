@@ -22,6 +22,7 @@ export const createWajibPajakOrangPribadi = async (
       result: wajibPajakOrangPribadi,
     });
   } catch (error) {
+    console.log(Object.getPrototypeOf(error));
     if (error instanceof HttpError) {
       return res.status(error.statusCode).json({
         status: {
@@ -63,7 +64,6 @@ export const uploadSomeDocument = async (req: Request, res: Response) => {
 
       const path = 'registrasi_wajib_pajak';
 
-      // call service
       await uploadWpopDocument(
         {
           file: {
@@ -81,6 +81,12 @@ export const uploadSomeDocument = async (req: Request, res: Response) => {
     multerHandler(req, res, controller);
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ message: 'internal server error' });
+    return res.status(500).json({
+      status: {
+        code: 500,
+        description: 'Internal Server Error',
+      },
+      result: null,
+    });
   }
 };
