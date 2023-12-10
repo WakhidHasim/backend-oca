@@ -16,7 +16,7 @@ export const createKegaiatanBadanUsahaSchema = z.object({
   noRekening: z.string().max(30),
   namaRekening: z.string().max(100),
   narahubung: z.string().max(100),
-  fileBuktiPotong: z.string().max(255),
+  fileBuktiPotong: z.string().max(255), // NOTE: this contain only filename of uploaded content
   kodePeriodeOtorisasi: z.string().optional(),
 });
 
