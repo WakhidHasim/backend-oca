@@ -1,14 +1,11 @@
 import { prisma } from '../config/database';
 import BadRequestError from '../error/BadRequestError';
 import { handleZodError } from '../error/ZodError';
-import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
 
 import { KegiatanPenghasilanBadan } from '../entities/kegiatanPenghasilanBadan';
 import { createKegaiatanBadanUsahaSchema } from '../validation/kegiatanBadanUsahaSchema';
 
-type CreatePph23Param = KegiatanPenghasilanBadan;
+export type CreatePph23Param = KegiatanPenghasilanBadan;
 
 const padNumber = (number: number, length: number): string => {
   let str: string = '' + number;
@@ -30,24 +27,6 @@ const generateKodeKegiatanBadan = async (): Promise<string> => {
     throw error;
   }
 };
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadPath =
-      'public/kegiatan_penghasilan_badan/pph23/file_bukti_potong';
-    fs.mkdirSync(uploadPath, { recursive: true });
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    const fileName = `${Date.now()}-${file.originalname}`;
-    cb(null, fileName);
-  },
-});
-
-const upload = multer({
-  storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB file size limit
-});
 
 export const createKegiatanPenghasilanBadanPPh23 = async (
   data: CreatePph23Param
