@@ -7,6 +7,7 @@ import agentRoutes from './routes/agentRoutes';
 import bankRoutes from './routes/bankRoutes';
 import negaraRoutes from './routes/negaraRoutes';
 import wajibPajakOrangPribadiRoutes from './routes/wajibPajakOrangPribadiRoutes';
+import kegiatanPenghasilanBadanRoutes from './routes/kegaiatanPenghasilanBadanRoutes';
 import uploadRoutes from './routes/uploadRoute';
 
 const app = express();
@@ -18,6 +19,11 @@ app.use(validationErrorHandler);
 app.use('/api/agent/login', agentRoutes);
 app.use('/api/bank', authenticateJwtMiddleware, bankRoutes);
 app.use('/api/negara', authenticateJwtMiddleware, negaraRoutes);
+app.use(
+  '/api/kegiatan-penghasilan-badan',
+  authenticateJwtMiddleware,
+  kegiatanPenghasilanBadanRoutes
+);
 app.use('/api/wajib-pajak-orang-pribadi', wajibPajakOrangPribadiRoutes);
 app.use('/api/upload', uploadRoutes);
 

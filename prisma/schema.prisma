@@ -25,7 +25,6 @@ model JenisPajak {
   tataCaraHitung           String?                    @map("tata_cara_hitung") @db.VarChar(200)
   ObjekPajak               ObjekPajak[]
   KegiatanPenghasilanOP    KegiatanPenghasilanOP[]
-  KegiatanPenghasilanBadan KegiatanPenghasilanBadan[]
   LogKegiatanPenghasilanOP LogKegiatanPenghasilanOP[]
 
   @@map("jenis_pajak")
@@ -93,11 +92,10 @@ model ObjekPajak {
   kodeObjek                    String                         @id @map("kode_objek") @db.VarChar(20)
   kodeJenisPajakId             Int                            @map("kode_jenis_pajak_id") @db.Integer
   jenisPajak                   JenisPajak                     @relation(fields: [kodeJenisPajakId], references: [kodeJenisPajak])
-  objekPajak                   String                         @map("objek_pajak") @db.VarChar(100)
+  objekPajak                   String                         @map("objek_pajak") @db.VarChar(255)
   tarifNpwp                    Float                          @map("tarif_npwp")
   tarifNonNpwp                 Float                          @map("tarif_non_npwp")
   ItemKegiatanPenghasilanOP    ItemKegiatanPenghasilanOP[]
-  KegiatanPenghasilanBadan     KegiatanPenghasilanBadan[]
   InventarisasiPajak           InventarisasiPajak[]
   LogItemKegiatanPenghasilanOP LogItemKegiatanPenghasilanOP[]
 
@@ -136,11 +134,10 @@ model Pengelola {
 }
 
 model OtorisasiSetorPajak {
-  kodePeriode              String                     @id @map("kode_periode") @db.VarChar(20)
-  statusPengesahan         String                     @map("status_pengesahan") @db.VarChar(50)
-  catatan                  String                     @db.Text
-  KegiatanPenghasilanOP    KegiatanPenghasilanOP[]
-  KegiatanPenghasilanBadan KegiatanPenghasilanBadan[]
+  kodePeriode           String                  @id @map("kode_periode") @db.VarChar(20)
+  statusPengesahan      String                  @map("status_pengesahan") @db.VarChar(50)
+  catatan               String                  @db.Text
+  KegiatanPenghasilanOP KegiatanPenghasilanOP[]
 
   @@map("otorisasi_setor_pajak")
 }
@@ -157,7 +154,6 @@ model PengajuanAnggaran {
   statusPengajuan          String                     @map("status_pengajuan") @db.VarChar(50)
   tanggalPengajuan         DateTime                   @map("tanggal_pengajuan") @db.Date
   KegiatanPenghasilanOP    KegiatanPenghasilanOP[]
-  KegiatanPenghasilanBadan KegiatanPenghasilanBadan[]
   InventarisasiPajak       InventarisasiPajak[]
   LogKegiatanPenghasilanOP LogKegiatanPenghasilanOP[]
 
@@ -194,36 +190,34 @@ model WajibPajakOrangPribadi {
 }
 
 model WajibPajakBadanUsaha {
-  kodeWPBadan              String                     @id @map("kode_wpbadan") @db.VarChar(50)
-  namaBadan                String                     @map("nama_badan") @db.VarChar(100)
-  email                    String                     @unique @db.VarChar(200)
-  npwp                     String?                    @db.VarChar(30)
-  namaNpwp                 String?                    @map("nama_npwp") @db.VarChar(100)
-  kotaNpwp                 String?                    @map("kota_npwp") @db.VarChar(50)
-  bankTransfer             String?                    @map("bank_transfer") @db.VarChar(50)
-  noRekening               String?                    @map("no_rekening") @db.VarChar(30)
-  namaRekening             String?                    @map("nama_rekening") @db.VarChar(100)
-  namaNaraHubung           String                     @map("nama_narahubung") @db.VarChar(100)
-  kontakNaraHubung         String                     @map("kontak_narahubung") @db.VarChar(15)
-  adaSkbPPh23              Boolean                    @map("ada_skb_pph23") @db.Boolean
-  masaBerlakuBebasPPh23    DateTime                   @map("masa_berlaku_bebas_pph23") @db.Date
-  fileFotoIdentitasBadan   String                     @map("file_foto_identitas_badan") @db.VarChar(255)
-  fileFotoBuktiRekening    String                     @map("file_foto_bukti_rekening") @db.VarChar(255)
-  fileFotoNpwp             String?                    @map("file_foto_npwp") @db.VarChar(255)
-  fileSuratBebasPPh23      String?                    @map("file_surat_bebas_pph23") @db.VarChar(255)
-  statusPkp                String                     @map("status_pkp") @db.VarChar(3)
-  KegiatanPenghasilanBadan KegiatanPenghasilanBadan[]
+  kodeWPBadan            String   @id @map("kode_wpbadan") @db.VarChar(50)
+  namaBadan              String   @map("nama_badan") @db.VarChar(100)
+  email                  String   @unique @db.VarChar(200)
+  npwp                   String?  @db.VarChar(30)
+  namaNpwp               String?  @map("nama_npwp") @db.VarChar(100)
+  kotaNpwp               String?  @map("kota_npwp") @db.VarChar(50)
+  bankTransfer           String?  @map("bank_transfer") @db.VarChar(50)
+  noRekening             String?  @map("no_rekening") @db.VarChar(30)
+  namaRekening           String?  @map("nama_rekening") @db.VarChar(100)
+  namaNaraHubung         String   @map("nama_narahubung") @db.VarChar(100)
+  kontakNaraHubung       String   @map("kontak_narahubung") @db.VarChar(15)
+  adaSkbPPh23            Boolean  @map("ada_skb_pph23") @db.Boolean
+  masaBerlakuBebasPPh23  DateTime @map("masa_berlaku_bebas_pph23") @db.Date
+  fileFotoIdentitasBadan String   @map("file_foto_identitas_badan") @db.VarChar(255)
+  fileFotoBuktiRekening  String   @map("file_foto_bukti_rekening") @db.VarChar(255)
+  fileFotoNpwp           String?  @map("file_foto_npwp") @db.VarChar(255)
+  fileSuratBebasPPh23    String?  @map("file_surat_bebas_pph23") @db.VarChar(255)
+  statusPkp              String   @map("status_pkp") @db.VarChar(3)
 
   @@map("wajib_pajak_badan_usaha")
 }
 
 model JenisPenghasilan {
-  kodeJenisPenghasilan     Int                        @id @map("kode_jenis_penghasilan") @db.Integer
-  kodeAkun                 Int                        @map("kode_akun") @db.Integer
-  jenisPajakTerkait        Int                        @map("jenis_pajak_terkait") @db.Integer
-  jenisPenghasilan         String                     @map("jenis_penghasilan") @db.VarChar(100)
-  kegiatanPenghasilanOP    KegiatanPenghasilanOP[]
-  KegiatanPenghasilanBadan KegiatanPenghasilanBadan[]
+  kodeJenisPenghasilan  Int                     @id @map("kode_jenis_penghasilan") @db.Integer
+  kodeAkun              Int                     @map("kode_akun") @db.Integer
+  jenisPajakTerkait     Int                     @map("jenis_pajak_terkait") @db.Integer
+  jenisPenghasilan      String                  @map("jenis_penghasilan") @db.VarChar(100)
+  kegiatanPenghasilanOP KegiatanPenghasilanOP[]
 
   @@map("jenis_penghasilan")
 }
@@ -277,61 +271,51 @@ model ItemKegiatanPenghasilanOP {
 }
 
 model KegiatanPenghasilanBadan {
-  kodeKegiatanBadan    String                @id @map("kode_kegiatan_badan") @db.VarChar(50)
-  tanggalTransaksi     DateTime              @map("tanggal_transaksi") @db.Date
-  uraianKegiatan       String                @map("uraian_kegiatan") @db.VarChar(200)
-  idKegiatanAnggaran   String                @map("id_kegiatan_anggaran") @db.VarChar(20)
-  pengajuanAnggaran    PengajuanAnggaran     @relation(fields: [idKegiatanAnggaran], references: [idKegiatanAnggaran])
-  kodeJenisPenghasilan Int                   @map("kode_jenis_penghasilan") @db.Integer
-  jenisPenghasilan     JenisPenghasilan      @relation(fields: [kodeJenisPenghasilan], references: [kodeJenisPenghasilan])
-  kodeJenisPajak       Int                   @map("kode_jenis_pajak") @db.Integer
-  jenisPajak           JenisPajak            @relation(fields: [kodeJenisPajak], references: [kodeJenisPajak])
-  kodeWPBadan          String                @map("kode_wp_badan") @db.VarChar(50)
-  wajibPajakBadanUsaha WajibPajakBadanUsaha  @relation(fields: [kodeWPBadan], references: [kodeWPBadan])
-  penghasilanBruto     Float                 @map("penghasilan_bruto")
-  kodeObjek            String                @map("kode_objek") @db.VarChar(20)
-  objekPajak           ObjekPajak            @relation(fields: [kodeObjek], references: [kodeObjek])
-  tarifPajak           Float                 @map("tarif_pajak")
-  tanggalPotongPPh     DateTime              @map("tanggal_potong_pph") @db.Date
-  tanggalSetorPPh      DateTime              @map("tanggal_setor_pph") @db.Date
-  tanggalBayarPPh      DateTime              @map("tanggal_bayar_pph") @db.Date
-  noRekening           String                @map("no_rekening") @db.VarChar(30)
-  namaRekening         String                @map("nama_rekening") @db.VarChar(100)
-  narahubung           String                @db.VarChar(100)
-  fileBuktiPotong      String                @map("file_bukti_potong") @db.VarChar(255)
-  kodePeriodeOtorisasi String                @map("kode_periode_otorisasi") @db.VarChar(20)
-  otorisasiSetorPajak  OtorisasiSetorPajak   @relation(fields: [kodePeriodeOtorisasi], references: [kodePeriode])
-  DetailFilePendukung  DetailFilePendukung[]
-  InventarisasiPajak   InventarisasiPajak[]
+  kodeKegiatanBadan    String   @id @map("kode_kegiatan_badan") @db.VarChar(50)
+  tanggalTransaksi     DateTime @map("tanggal_transaksi") @db.Date
+  uraianKegiatan       String   @map("uraian_kegiatan") @db.VarChar(200)
+  idKegiatanAnggaran   String   @map("id_kegiatan_anggaran") @db.VarChar(20)
+  kodeJenisPenghasilan Int      @map("kode_jenis_penghasilan") @db.Integer
+  kodeJenisPajak       Int      @map("kode_jenis_pajak") @db.Integer
+  kodeWPBadan          String   @map("kode_wp_badan") @db.VarChar(50)
+  penghasilanBruto     Float    @map("penghasilan_bruto")
+  kodeObjek            String   @map("kode_objek") @db.VarChar(20)
+  tarifPajak           Float    @map("tarif_pajak")
+  tanggalPotongPPh     DateTime @map("tanggal_potong_pph") @db.Date
+  tanggalSetorPPh      DateTime @map("tanggal_setor_pph") @db.Date
+  tanggalBayarPPh      DateTime @map("tanggal_bayar_pph") @db.Date
+  noRekening           String   @map("no_rekening") @db.VarChar(30)
+  namaRekening         String   @map("nama_rekening") @db.VarChar(100)
+  narahubung           String   @db.VarChar(100)
+  fileBuktiPotong      String   @map("file_bukti_potong") @db.VarChar(255)
+  kodePeriodeOtorisasi String?  @map("kode_periode_otorisasi") @db.VarChar(20)
 
   @@map("kegiatan_penghasilan_badan")
 }
 
 model DetailFilePendukung {
-  id                       Int                      @id @default(autoincrement()) @db.Integer
-  kodeKegiatanBadan        String                   @map("kode_kegiatan_badan") @db.VarChar(50)
-  kegiatanPenghasilanBadan KegiatanPenghasilanBadan @relation(fields: [kodeKegiatanBadan], references: [kodeKegiatanBadan])
-  jenisDokumen             String                   @map("jenis_dokumen") @db.VarChar(50)
-  noDokumen                String                   @map("no_dokumen") @db.VarChar(30)
-  fileBuktiPendukung       String                   @map("file_bukti_pendukung") @db.VarChar(255)
+  id                 Int    @id @default(autoincrement()) @db.Integer
+  kodeKegiatanBadan  String @map("kode_kegiatan_badan") @db.VarChar(50)
+  jenisDokumen       String @map("jenis_dokumen") @db.VarChar(50)
+  noDokumen          String @map("no_dokumen") @db.VarChar(30)
+  fileBuktiPendukung String @map("file_bukti_pendukung") @db.VarChar(255)
 
   @@map("detail_file_pendukung")
 }
 
 model InventarisasiPajak {
-  idInventarisasiPajak     Int                      @id @default(autoincrement()) @map("id_inventarisasi_pajak") @db.Integer
-  kodeKegiatanBadan        String                   @map("kode_kegiatan_badan") @db.VarChar(50)
-  kegiatanPenghasilanBadan KegiatanPenghasilanBadan @relation(fields: [kodeKegiatanBadan], references: [kodeKegiatanBadan])
-  uraianKegiatan           String                   @map("uraian_kegiatan") @db.VarChar(200)
-  idKegiatanAnggaran       String                   @map("id_kegiatan_anggaran") @db.VarChar(20)
-  pengajuanAnggaran        PengajuanAnggaran        @relation(fields: [idKegiatanAnggaran], references: [idKegiatanAnggaran])
-  penghasilanBruto         Float                    @map("penghasilan_bruto")
-  kodeObjek                String                   @map("kode_objek") @db.VarChar(20)
-  objekPajak               ObjekPajak               @relation(fields: [kodeObjek], references: [kodeObjek])
-  nominalPajak             Float                    @map("nominal_pajak")
-  fileBukti                String                   @map("file_bukti") @db.VarChar(255)
-  npwpPemotong             String?                  @map("npwp_pemotong") @db.VarChar(30)
-  namaPemotong             String?                  @map("nama_pemotong") @db.VarChar(100)
+  idInventarisasiPajak Int               @id @default(autoincrement()) @map("id_inventarisasi_pajak") @db.Integer
+  kodeKegiatanBadan    String            @map("kode_kegiatan_badan") @db.VarChar(50)
+  uraianKegiatan       String            @map("uraian_kegiatan") @db.VarChar(200)
+  idKegiatanAnggaran   String            @map("id_kegiatan_anggaran") @db.VarChar(20)
+  pengajuanAnggaran    PengajuanAnggaran @relation(fields: [idKegiatanAnggaran], references: [idKegiatanAnggaran])
+  penghasilanBruto     Float             @map("penghasilan_bruto")
+  kodeObjek            String            @map("kode_objek") @db.VarChar(20)
+  objekPajak           ObjekPajak        @relation(fields: [kodeObjek], references: [kodeObjek])
+  nominalPajak         Float             @map("nominal_pajak")
+  fileBukti            String            @map("file_bukti") @db.VarChar(255)
+  npwpPemotong         String?           @map("npwp_pemotong") @db.VarChar(30)
+  namaPemotong         String?           @map("nama_pemotong") @db.VarChar(100)
 
   @@map("inventarisasi_pajak")
 }
