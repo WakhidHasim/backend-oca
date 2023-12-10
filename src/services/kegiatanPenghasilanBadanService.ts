@@ -236,7 +236,20 @@ export const updateKegiatanPenghasilanBadanPPh23 = async (
   if (!validator.success)
     throw new BadRequestError(handleZodError(validator.error));
 
-  const requestBody = validator.data;
+  const requestBody = validator.data as { [key: string]: any };
+
+  const isoDateFields = [
+    'tanggal_transaksi',
+    'tanggal_potong_pph',
+    'tanggal_setor_pph',
+    'tanggal_bayar_pph',
+  ];
+
+  isoDateFields.forEach((field) => {
+    if (requestBody[field] instanceof Date) {
+      requestBody[field] = requestBody[field].toISOString();
+    }
+  });
 
   const existingKodeJenisPenghasilan = await prisma.jenisPenghasilan.findUnique(
     {
@@ -272,8 +285,8 @@ export const updateKegiatanPenghasilanBadanPPh23 = async (
     await prisma.kegiatanPenghasilanBadan.update({
       where: { kodeKegiatanBadan: kode_kegiatan_badan },
       data: {
-        kodeKegiatanBadan: data?.kode_kegiatan_badan || undefined,
-        tanggalTransaksi: data?.tanggal_transaksi || undefined,
+        kodeKegiatanBadan: data?.kode_kegiatan_badan,
+        tanggalTransaksi: requestBody.tanggal_transaksi,
         uraianKegiatan: data?.uraian_kegiatan,
         idKegiatanAnggaran: data?.id_kegiatan_anggaran,
         kodeJenisPenghasilan: data?.kode_jenis_penghasilan,
@@ -282,9 +295,9 @@ export const updateKegiatanPenghasilanBadanPPh23 = async (
         penghasilanBruto: data?.penghasilan_bruto,
         kodeObjek: data?.kode_objek,
         tarifPajak: tarifPajak,
-        tanggalPotongPPh: data?.tanggal_potong_pph,
-        tanggalSetorPPh: data?.tanggal_setor_pph,
-        tanggalBayarPPh: data?.tanggal_bayar_pph,
+        tanggalPotongPPh: requestBody.tanggal_potong_pph,
+        tanggalSetorPPh: requestBody.tanggal_setor_pph,
+        tanggalBayarPPh: requestBody.tanggal_bayar_pph,
         noRekening: data?.no_rekening,
         namaRekening: data?.nama_rekening,
         narahubung: data?.narahubung,
