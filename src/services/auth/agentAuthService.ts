@@ -51,13 +51,42 @@ export const handleAgentLogin = async (param: agentLoginIn) => {
       throw new Error('Agent tidak aktif!');
     }
 
+    const pegawai = await prisma.pegawai.findUnique({
+      where: { nip: param.user_id },
+    });
+
+    if (!pegawai) {
+      throw new Error('Pegawai tidak ditemukan');
+    }
+
+    const namaPegawai = pegawai.nama;
+
+    const satuanKerja = await prisma.satuanKerja.findUnique({
+      where: { idl: agent.idl },
+    });
+
+    if (!satuanKerja) {
+      throw new Error('Satuan Kerja tidak ditemukan');
+    }
+
+    const namaSatker = satuanKerja.namaSatker;
+
     const secretKey = process.env.JWT_SECRET_KEY ?? '';
 
     const expiresIn = 6000;
 
-    const jwtToken = jwt.sign({ nip: agent.nip, idl: agent.idl }, secretKey, {
-      expiresIn: expiresIn,
-    });
+    const jwtToken = jwt.sign(
+      {
+        nip: agent.nip,
+        nama_pegawai: namaPegawai,
+        idl: agent.idl,
+        nama_satker: namaSatker,
+      },
+      secretKey,
+      {
+        expiresIn: expiresIn,
+      }
+    );
 
     return {
       status: {
