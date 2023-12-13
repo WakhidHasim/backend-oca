@@ -9,6 +9,8 @@ export type KegiatanPenghasilanBadan = {
   penghasilan_bruto: number;
   kode_objek: string;
   tarif_pajak: number;
+  potongan_pajak: number;
+  penghasilan_diterima: number;
   tanggal_potong_pph: Date;
   tanggal_setor_pph: Date;
   tanggal_bayar_pph: Date;

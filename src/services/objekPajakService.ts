@@ -8,7 +8,7 @@ type GetObjekPajakParam = {
   tarif_non_npwp?: number;
 };
 
-export const getObjekPajakList = async (data: GetObjekPajakParam) => {
+export const getObjekPajakPPh23List = async (data: GetObjekPajakParam) => {
   const objekPajakList = {
     kodeObjek: data?.kode_objek,
     kodeJenisPajakId: data?.kode_jenis_pajak_id,
@@ -19,5 +19,6 @@ export const getObjekPajakList = async (data: GetObjekPajakParam) => {
 
   return prisma.objekPajak.findMany({
     where: objekPajakList,
+    kodeJenisPajakId: 2,
   });
 };

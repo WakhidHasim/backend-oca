@@ -61,15 +61,25 @@ export const handleAgentLogin = async (param: agentLoginIn) => {
 
     const namaPegawai = pegawai.nama;
 
-    const satuanKerja = await prisma.satuanKerja.findUnique({
-      where: { idl: agent.idl },
+    const satuanKerja = await prisma.satuanKerja.findMany({
+      where: {
+        idl: {
+          in: agent.idl,
+        },
+      },
     });
 
-    if (!satuanKerja) {
+    if (!satuanKerja || satuanKerja.length === 0) {
       throw new Error('Satuan Kerja tidak ditemukan');
     }
 
-    const namaSatker = satuanKerja.namaSatker;
+    const namaSatker: string[] = satuanKerja.map(
+      (satuanKerja: { namaSatker: string }) => satuanKerja.namaSatker
+    );
+
+    if (namaSatker.length === 0) {
+      throw new Error('Nama Satker tidak ditemukan');
+    }
 
     const secretKey = process.env.JWT_SECRET_KEY ?? '';
 

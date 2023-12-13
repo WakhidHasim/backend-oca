@@ -4,6 +4,6 @@ import * as objekPajakController from '../controllers/objekPajakController';
 
 const router = express.Router();
 
-router.get('/', objekPajakController.objekPajakList);
+router.get('/', objekPajakController.objekPajakPPh23List);
 
 export default router;

@@ -2,10 +2,10 @@ import { Request, Response } from 'express';
 
 import * as objekPajakService from '../services/objekPajakService';
 
-export const objekPajakList = async (req: Request, res: Response) => {
+export const objekPajakPPh23List = async (req: Request, res: Response) => {
   try {
     const queryParameters = req.query;
-    const objekPajakList = await objekPajakService.getObjekPajakList(
+    const objekPajakList = await objekPajakService.getObjekPajakPPh23List(
       queryParameters
     );
     res.json({

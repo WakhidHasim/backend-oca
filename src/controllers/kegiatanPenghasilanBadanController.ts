@@ -29,17 +29,18 @@ export const createKegiatanPenghasilanBadanPPh23 = async (
 ) => {
   try {
     const controller = async () => {
-      if (!req.file) return res.status(400).json({ message: "file required" })
+      if (!req.file) return res.status(400).json({ message: 'file required' });
 
-      const file = req.file
+      const file = req.file;
 
       const kegaiatanPenghasilanBadanPPh23 =
-        await kegiatanPenghasilanBadanService.createKegiatanPenghasilanBadanPPh23({
-          ...req.body,
-          penghasilan_bruto: Number(req.body?.penghasilan_bruto),
-          kode_jenis_penghasilan: Number(req.body?.kode_jenis_penghasilan),
-          file_bukti_potong: file.filename
-        }
+        await kegiatanPenghasilanBadanService.createKegiatanPenghasilanBadanPPh23(
+          {
+            ...req.body,
+            penghasilan_bruto: Number(req.body?.penghasilan_bruto),
+            kode_jenis_penghasilan: Number(req.body?.kode_jenis_penghasilan),
+            file_bukti_potong: file.filename,
+          }
         );
 
       res.json({
@@ -50,10 +51,10 @@ export const createKegiatanPenghasilanBadanPPh23 = async (
         },
         result: kegaiatanPenghasilanBadanPPh23,
       });
-    }
+    };
 
-    const multerHandler = uploadFileBuktiPotong.single("file_bukti_potong")
-    multerHandler(req, res, controller)
+    const multerHandler = uploadFileBuktiPotong.single('file_bukti_potong');
+    multerHandler(req, res, controller);
   } catch (error) {
     console.log(Object.getPrototypeOf(error));
     if (error instanceof HttpError) {
