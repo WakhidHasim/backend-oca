@@ -18,7 +18,9 @@ export const getObjekPajakPPh23List = async (data: GetObjekPajakParam) => {
   };
 
   return prisma.objekPajak.findMany({
-    where: objekPajakList,
-    kodeJenisPajakId: 2,
+    where: {
+      ...objekPajakList,
+      kodeJenisPajakId: 2,
+    },
   });
 };

@@ -3,7 +3,10 @@ import BadRequestError from '../error/BadRequestError';
 import { handleZodError } from '../error/ZodError';
 
 import { KegiatanPenghasilanBadan } from '../entities/kegiatanPenghasilanBadan';
-import { createKegaiatanBadanUsahaSchema } from '../validation/kegiatanBadanUsahaSchema';
+import {
+  createKegaiatanBadanUsahaSchema,
+  updateKegiatanBadanUsahaSchema,
+} from '../validation/kegiatanBadanUsahaSchema';
 
 type CreatePph23Param = KegiatanPenghasilanBadan;
 type UpdatePph23Pram = KegiatanPenghasilanBadan;
@@ -64,14 +67,13 @@ export const createKegiatanPenghasilanBadanPPh23 = async (
     penghasilanBruto: data.penghasilan_bruto,
     kodeObjek: data.kode_objek,
     tarifPajak: data.tarif_pajak,
-    potonganPajak: data.potongan_pajak,
     penghasilanDiterima: data.penghasilan_diterima,
     tanggalPotongPPh: data.tanggal_potong_pph,
-    tanggalSetorPPh: data.tanggal_setor_pph,
-    tanggalBayarPPh: data.tanggal_bayar_pph,
     noRekening: data.no_rekening,
     namaRekening: data.nama_rekening,
     narahubung: data.narahubung,
+    jenisDokumenTerkait: data.jenis_dokumen_terkait,
+    noDokumenReferensi: data.no_dokumen_referensi,
     fileBuktiPotong: data.file_bukti_potong,
   });
 
@@ -129,7 +131,7 @@ export const createKegiatanPenghasilanBadanPPh23 = async (
 
   let tarifPajak;
 
-  if (wajibPajakNpwp === '0000000000000000') {
+  if (wajibPajakNpwp === '0000000000000000' || wajibPajakNpwp == 'BELUM ADA') {
     tarifPajak = tarifNonNpwp;
   } else {
     tarifPajak = tarifNpwp;
@@ -137,7 +139,7 @@ export const createKegiatanPenghasilanBadanPPh23 = async (
 
   const potonganPajak = (tarifPajak / 100) * requestBody.penghasilanBruto;
 
-  const penghasilanDiterima = (requestBody.penghasilanBruto = potonganPajak);
+  const penghasilanDiterima = requestBody.penghasilanBruto - potonganPajak;
 
   const craetePPh23 = await prisma.kegiatanPenghasilanBadan.create({
     data: {
@@ -154,33 +156,46 @@ export const createKegiatanPenghasilanBadanPPh23 = async (
       potonganPajak: potonganPajak,
       penghasilanDiterima: penghasilanDiterima,
       tanggalPotongPPh: requestBody.tanggalPotongPPh,
-      tanggalSetorPPh: requestBody.tanggalSetorPPh,
-      tanggalBayarPPh: requestBody.tanggalBayarPPh,
       noRekening: requestBody.noRekening,
       namaRekening: requestBody.namaRekening,
       narahubung: requestBody.narahubung,
+      jenisDokumenTerkait: requestBody.jenisDokumenTerkait,
+      noDokumenReferensi: requestBody.noDokumenReferensi,
       fileBuktiPotong: requestBody.fileBuktiPotong,
+      status: 'Entry',
     },
   });
 
+  const tanggalTransaksi = craetePPh23.tanggalTransaksi
+    .toISOString()
+    .split('T')[0];
+
+  const tanggalPotongPPh = craetePPh23.tanggalPotongPPh
+    .toISOString()
+    .split('T')[0];
+
   return {
     kode_kegiatan_badan: craetePPh23.kodeKegiatanBadan,
-    tanggal_transaksi: craetePPh23.tanggalTransaksi,
+    tanggal_transaksi: tanggalTransaksi,
     uraian_kegiatan: craetePPh23.uraianKegiatan,
     id_kegiatan_anggaran: craetePPh23.idKegiatanAnggaran,
     kode_jenis_penghasilan: craetePPh23.kodeJenisPenghasilan,
     kode_jenis_pajak: craetePPh23.kodeJenisPajak,
     kode_wp_badan: craetePPh23.kodeWPBadan,
+    npwp: wajibPajakNpwp,
     penghasilan_bruto: craetePPh23.penghasilanBruto,
     kode_objek: craetePPh23.kodeObjek,
     tarif_pajak: craetePPh23.tarifPajak,
-    tanggal_potong_pph: craetePPh23.tanggalPotongPPh,
-    tanggal_setor_pph: craetePPh23.tanggalSetorPPh,
-    tanggal_bayar_pph: craetePPh23.tanggalBayarPPh,
+    potongan_pajak: craetePPh23.potonganPajak,
+    penghasilan_diterima: craetePPh23.penghasilanDiterima,
+    tanggal_potong_pph: tanggalPotongPPh,
     no_rekening: craetePPh23.noRekening,
     nama_rekening: craetePPh23.namaRekening,
     narahubung: craetePPh23.narahubung,
+    jenis_dokumen_terkait: craetePPh23.jenisDokumenTerkait,
+    no_dokumen_referensi: craetePPh23.noDokumenReferensi,
     file_bukti_potong: craetePPh23.fileBuktiPotong,
+    status: craetePPh23.status,
   };
 };
 
@@ -198,6 +213,7 @@ export const getKegiatanPenghasilanBadanPPh23List = async (
     penghasilanBruto: data?.penghasilan_bruto,
     kodeObjek: data?.kode_objek,
     tarifPajak: data?.tarif_pajak,
+    penghasilanDiterima: data.penghasilan_diterima,
     tanggalPotongPPh: data?.tanggal_potong_pph,
     tanggalSetorPPh: data?.tanggal_setor_pph,
     tanggalBayarPPh: data?.tanggal_bayar_pph,
@@ -212,11 +228,60 @@ export const getKegiatanPenghasilanBadanPPh23List = async (
   });
 };
 
+export const getKegiatanPenghasilanBadanPPh23ById = async (
+  kodeKegiatanBadan: string
+) => {
+  try {
+    const kegiatanPenghasilanBadan =
+      await prisma.kegiatanPenghasilanBadan.findUnique({
+        where: { kodeKegiatanBadan: kodeKegiatanBadan },
+      });
+
+    if (!kegiatanPenghasilanBadan) {
+      throw new Error('Record not found');
+    }
+
+    const tanggalTransaksi = kegiatanPenghasilanBadan.tanggalTransaksi
+      .toISOString()
+      .split('T')[0];
+
+    const tanggalPotongPPh = kegiatanPenghasilanBadan.tanggalPotongPPh
+      .toISOString()
+      .split('T')[0];
+
+    return {
+      kode_kegiatan_badan: kegiatanPenghasilanBadan.kodeKegiatanBadan,
+      tanggal_transaksi: tanggalTransaksi,
+      uraian_kegiatan: kegiatanPenghasilanBadan.uraianKegiatan,
+      id_kegiatan_anggaran: kegiatanPenghasilanBadan.idKegiatanAnggaran,
+      kode_jenis_penghasilan: kegiatanPenghasilanBadan.kodeJenisPenghasilan,
+      kode_jenis_pajak: kegiatanPenghasilanBadan.kodeJenisPajak,
+      kode_wp_badan: kegiatanPenghasilanBadan.kodeWPBadan,
+      penghasilan_bruto: kegiatanPenghasilanBadan.penghasilanBruto,
+      kode_objek: kegiatanPenghasilanBadan.kodeObjek,
+      tarif_pajak: kegiatanPenghasilanBadan.tarifPajak,
+      potongan_pajak: kegiatanPenghasilanBadan.potonganPajak,
+      penghasilan_diterima: kegiatanPenghasilanBadan.penghasilanDiterima,
+      tanggal_potong_pph: tanggalPotongPPh,
+      no_rekening: kegiatanPenghasilanBadan.noRekening,
+      nama_rekening: kegiatanPenghasilanBadan.namaRekening,
+      narahubung: kegiatanPenghasilanBadan.narahubung,
+      jenis_dokumen_terkait: kegiatanPenghasilanBadan.jenisDokumenTerkait,
+      no_dokumen_referensi: kegiatanPenghasilanBadan.noDokumenReferensi,
+      file_bukti_potong: kegiatanPenghasilanBadan.fileBuktiPotong,
+      status: kegiatanPenghasilanBadan.status,
+    };
+  } catch (error) {
+    console.error('Error retrieving Kegiatan Penghasilan Badan by ID:', error);
+    throw error;
+  }
+};
+
 export const updateKegiatanPenghasilanBadanPPh23 = async (
   kode_kegiatan_badan: string,
   data: UpdatePph23Pram
 ) => {
-  const validator = createKegaiatanBadanUsahaSchema.safeParse({
+  const validator = updateKegiatanBadanUsahaSchema.safeParse({
     kodeKegiatanBadan: data.kode_kegiatan_badan,
     tanggalTransaksi: data.tanggal_transaksi,
     uraianKegiatan: data.uraian_kegiatan,
@@ -227,12 +292,13 @@ export const updateKegiatanPenghasilanBadanPPh23 = async (
     penghasilanBruto: data.penghasilan_bruto,
     kodeObjek: data.kode_objek,
     tarifPajak: data.tarif_pajak,
+    penghasilanDiterima: data.penghasilan_diterima,
     tanggalPotongPPh: data.tanggal_potong_pph,
-    tanggalSetorPPh: data.tanggal_setor_pph,
-    tanggalBayarPPh: data.tanggal_bayar_pph,
     noRekening: data.no_rekening,
     namaRekening: data.nama_rekening,
     narahubung: data.narahubung,
+    jenisDokumenTerkait: data.jenis_dokumen_terkait,
+    noDokumenReferensi: data.no_dokumen_referensi,
     fileBuktiPotong: data.file_bukti_potong,
   });
 
@@ -241,12 +307,7 @@ export const updateKegiatanPenghasilanBadanPPh23 = async (
 
   const requestBody = validator.data as { [key: string]: any };
 
-  const isoDateFields = [
-    'tanggal_transaksi',
-    'tanggal_potong_pph',
-    'tanggal_setor_pph',
-    'tanggal_bayar_pph',
-  ];
+  const isoDateFields = ['tanggal_transaksi', 'tanggal_potong_pph'];
 
   isoDateFields.forEach((field) => {
     if (requestBody[field] instanceof Date) {
@@ -266,14 +327,6 @@ export const updateKegiatanPenghasilanBadanPPh23 = async (
     );
   }
 
-  const existingKodeWPBadan = await prisma.wajibPajakBadanUsaha.findUnique({
-    where: { kodeWPBadan: requestBody.kodeWPBadan },
-  });
-
-  if (!existingKodeWPBadan) {
-    throw new BadRequestError('Kode WP Badan tidak valid.');
-  }
-
   const existingKodeObject = await prisma.objekPajak.findUnique({
     where: { kodeObjek: requestBody.kodeObjek },
   });
@@ -282,13 +335,32 @@ export const updateKegiatanPenghasilanBadanPPh23 = async (
     throw new BadRequestError('Kode Objek tidak valid.');
   }
 
-  const tarifPajak = 0.02 * requestBody.penghasilanBruto;
+  const wajibPajakBadanUsaha = await prisma.wajibPajakBadanUsaha.findUnique({
+    where: { kodeWPBadan: requestBody.kodeWPBadan },
+  });
+
+  const wajibPajakNpwp = wajibPajakBadanUsaha.npwp;
+
+  const tarifNpwp = existingKodeObject.tarifNpwp;
+  const tarifNonNpwp = existingKodeObject.tarifNonNpwp;
+
+  let tarifPajak;
+
+  if (wajibPajakNpwp === '0000000000000000' || wajibPajakNpwp == 'BELUM ADA') {
+    tarifPajak = tarifNonNpwp;
+  } else {
+    tarifPajak = tarifNpwp;
+  }
+
+  const potonganPajak = (tarifPajak / 100) * requestBody.penghasilanBruto;
+
+  const penghasilanDiterima = requestBody.penghasilanBruto - potonganPajak;
 
   const updatekegiatanPenghasilanBadanPPh23 =
     await prisma.kegiatanPenghasilanBadan.update({
       where: { kodeKegiatanBadan: kode_kegiatan_badan },
       data: {
-        kodeKegiatanBadan: data?.kode_kegiatan_badan,
+        kodeKegiatanBadan: data.kode_kegiatan_badan,
         tanggalTransaksi: requestBody.tanggal_transaksi,
         uraianKegiatan: data?.uraian_kegiatan,
         idKegiatanAnggaran: data?.id_kegiatan_anggaran,
@@ -298,12 +370,14 @@ export const updateKegiatanPenghasilanBadanPPh23 = async (
         penghasilanBruto: data?.penghasilan_bruto,
         kodeObjek: data?.kode_objek,
         tarifPajak: tarifPajak,
+        potongan_pajak: data?.potongan_pajak,
+        penghasilan_diterima: penghasilanDiterima,
         tanggalPotongPPh: requestBody.tanggal_potong_pph,
-        tanggalSetorPPh: requestBody.tanggal_setor_pph,
-        tanggalBayarPPh: requestBody.tanggal_bayar_pph,
         noRekening: data?.no_rekening,
         namaRekening: data?.nama_rekening,
         narahubung: data?.narahubung,
+        jenisDokumenTerkait: data?.jenis_dokumen_terkait,
+        noDokumenReferensi: data?.no_dokumen_referensi,
         fileBuktiPotong: data?.file_bukti_potong,
       },
     });
@@ -325,12 +399,17 @@ export const updateKegiatanPenghasilanBadanPPh23 = async (
     penghasilan_bruto: updatekegiatanPenghasilanBadanPPh23.penghasilanBruto,
     kode_objek: updatekegiatanPenghasilanBadanPPh23.kodeObjek,
     tarif_pajak: updatekegiatanPenghasilanBadanPPh23.tarifPajak,
+    potongan_pajak: updatekegiatanPenghasilanBadanPPh23.potonganPajak,
+    penghasilan_diterima:
+      updatekegiatanPenghasilanBadanPPh23.penghasilanDiterima,
     tanggal_potong_pph: updatekegiatanPenghasilanBadanPPh23.tanggalPotongPPh,
-    tanggal_setor_pph: updatekegiatanPenghasilanBadanPPh23.tanggalSetorPPh,
-    tanggal_bayar_pph: updatekegiatanPenghasilanBadanPPh23.tanggalBayarPPh,
     no_rekening: updatekegiatanPenghasilanBadanPPh23.noRekening,
     nama_rekening: updatekegiatanPenghasilanBadanPPh23.namaRekening,
     narahubung: updatekegiatanPenghasilanBadanPPh23.narahubung,
+    jenis_dokumen_terkait:
+      updatekegiatanPenghasilanBadanPPh23.jenisDokumenTerkait,
+    no_dokumen_referensi:
+      updatekegiatanPenghasilanBadanPPh23.noDokumenReferensi,
     file_bukti_potong: updatekegiatanPenghasilanBadanPPh23.fileBuktiPotong,
   };
 };
@@ -351,134 +430,4 @@ export const deleteKegiatanPenghasilanBadanPph23 = async (
     });
 
   return !!deleteKegiatanPenghasilanBadanPPh23;
-};
-
-export const createKegiatanPenghasilanBadanPPh4 = async (
-  data: CreatePph23Param
-) => {
-  const validator = createKegaiatanBadanUsahaSchema.safeParse({
-    kodeKegiatanBadan: data.kode_kegiatan_badan,
-    tanggalTransaksi: data.tanggal_transaksi,
-    uraianKegiatan: data.uraian_kegiatan,
-    idKegiatanAnggaran: data.id_kegiatan_anggaran,
-    kodeJenisPenghasilan: data.kode_jenis_penghasilan,
-    kodeJenisPajak: data.kode_jenis_pajak,
-    kodeWPBadan: data.kode_wp_badan,
-    penghasilanBruto: data.penghasilan_bruto,
-    kodeObjek: data.kode_objek,
-    tarifPajak: data.tarif_pajak,
-    potonganPajak: data.potongan_pajak,
-    tanggalPotongPPh: data.tanggal_potong_pph,
-    tanggalSetorPPh: data.tanggal_setor_pph,
-    tanggalBayarPPh: data.tanggal_bayar_pph,
-    noRekening: data.no_rekening,
-    namaRekening: data.nama_rekening,
-    narahubung: data.narahubung,
-    fileBuktiPotong: data.file_bukti_potong,
-  });
-
-  if (!validator.success)
-    throw new BadRequestError(handleZodError(validator.error));
-
-  const requestBody = validator.data;
-
-  const kodeKegiatanBadan = await generateKodeKegiatanBadan();
-  const existingKodeKegiatanBadan =
-    await prisma.kegiatanPenghasilanBadan.findUnique({
-      where: { kodeKegiatanBadan: kodeKegiatanBadan },
-    });
-
-  if (existingKodeKegiatanBadan) {
-    throw new BadRequestError('Kode Kegiatan Badan sudah ada dalam database.');
-  }
-
-  const existingKodeJenisPenghasilan = await prisma.jenisPenghasilan.findUnique(
-    {
-      where: { kodeJenisPenghasilan: requestBody.kodeJenisPenghasilan },
-    }
-  );
-
-  if (!existingKodeJenisPenghasilan) {
-    throw new BadRequestError(
-      'Kode Jenis Penghasilan tidak valid atau tidak ditemukan.'
-    );
-  }
-
-  const existingKodeWPBadan = await prisma.wajibPajakBadanUsaha.findUnique({
-    where: { kodeWPBadan: requestBody.kodeWPBadan },
-  });
-
-  if (!existingKodeWPBadan) {
-    throw new BadRequestError('Kode WP Badan tidak valid.');
-  }
-
-  const existingKodeObject = await prisma.objekPajak.findUnique({
-    where: { kodeObjek: requestBody.kodeObjek },
-  });
-
-  if (!existingKodeObject) {
-    throw new BadRequestError('Kode Objek tidak valid.');
-  }
-
-  const wajibPajakBadanUsaha = await prisma.wajibPajakBadanUsaha.findUnique({
-    where: { kodeWPBadan: requestBody.kodeWPBadan },
-  });
-
-  const wajibPajakNpwp = wajibPajakBadanUsaha.npwp;
-
-  const tarifNpwp = existingKodeObject.tarifNpwp;
-  const tarifNonNpwp = existingKodeObject.tarifNonNpwp;
-
-  let tarifPajak;
-
-  if (wajibPajakNpwp === '0000000000000000') {
-    tarifPajak = tarifNonNpwp;
-  } else {
-    tarifPajak = tarifNpwp;
-  }
-
-  const potonganPajak = (tarifPajak / 100) * requestBody.penghasilanBruto;
-
-  const craetePPh23 = await prisma.kegiatanPenghasilanBadan.create({
-    data: {
-      kodeKegiatanBadan: kodeKegiatanBadan,
-      tanggalTransaksi: requestBody.tanggalTransaksi,
-      uraianKegiatan: requestBody.uraianKegiatan,
-      idKegiatanAnggaran: requestBody.idKegiatanAnggaran,
-      kodeJenisPenghasilan: requestBody.kodeJenisPenghasilan,
-      kodeJenisPajak: 2,
-      kodeWPBadan: requestBody.kodeWPBadan,
-      penghasilanBruto: requestBody.penghasilanBruto,
-      kodeObjek: requestBody.kodeObjek,
-      tarifPajak: tarifPajak,
-      potonganPajak: potonganPajak,
-      tanggalPotongPPh: requestBody.tanggalPotongPPh,
-      tanggalSetorPPh: requestBody.tanggalSetorPPh,
-      tanggalBayarPPh: requestBody.tanggalBayarPPh,
-      noRekening: requestBody.noRekening,
-      namaRekening: requestBody.namaRekening,
-      narahubung: requestBody.narahubung,
-      fileBuktiPotong: requestBody.fileBuktiPotong,
-    },
-  });
-
-  return {
-    kode_kegiatan_badan: craetePPh23.kodeKegiatanBadan,
-    tanggal_transaksi: craetePPh23.tanggalTransaksi,
-    uraian_kegiatan: craetePPh23.uraianKegiatan,
-    id_kegiatan_anggaran: craetePPh23.idKegiatanAnggaran,
-    kode_jenis_penghasilan: craetePPh23.kodeJenisPenghasilan,
-    kode_jenis_pajak: craetePPh23.kodeJenisPajak,
-    kode_wp_badan: craetePPh23.kodeWPBadan,
-    penghasilan_bruto: craetePPh23.penghasilanBruto,
-    kode_objek: craetePPh23.kodeObjek,
-    tarif_pajak: craetePPh23.tarifPajak,
-    tanggal_potong_pph: craetePPh23.tanggalPotongPPh,
-    tanggal_setor_pph: craetePPh23.tanggalSetorPPh,
-    tanggal_bayar_pph: craetePPh23.tanggalBayarPPh,
-    no_rekening: craetePPh23.noRekening,
-    nama_rekening: craetePPh23.namaRekening,
-    narahubung: craetePPh23.narahubung,
-    file_bukti_potong: craetePPh23.fileBuktiPotong,
-  };
 };

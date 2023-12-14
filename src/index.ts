@@ -22,7 +22,7 @@ app.use(validationErrorHandler);
 app.use('/api/agent/login', agentRoutes);
 app.use('/api/bank', authenticateJwtMiddleware, bankRoutes);
 app.use('/api/negara', authenticateJwtMiddleware, negaraRoutes);
-app.use('/api/objek-pajak', authenticateJwtMiddleware, objekPajakRoutes);
+app.use('/api/objek-pajak-pph23', authenticateJwtMiddleware, objekPajakRoutes);
 app.use(
   '/api/pengajuan-anggaran',
   authenticateJwtMiddleware,

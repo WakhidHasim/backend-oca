@@ -67,12 +67,13 @@ export const createWajibPajakOrangPribadi = async (
     Kewarganegaraan[
       requestBody.kewarganegaraan as keyof typeof Kewarganegaraan
     ];
-  const statusPegawaiString =
-    StatusPegawai[requestBody.statusPegawai as keyof typeof StatusPegawai];
 
   if (!Object.values(Kewarganegaraan).includes(kewarganegaraanString)) {
     throw new BadRequestError('Nilai kewarganegaraan tidak valid.');
   }
+
+  const statusPegawaiString =
+    StatusPegawai[requestBody.statusPegawai as keyof typeof StatusPegawai];
 
   if (!Object.values(StatusPegawai).includes(statusPegawaiString)) {
     throw new BadRequestError('Nilai status pegawai tidak valid.');

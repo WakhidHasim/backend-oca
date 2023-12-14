@@ -94,7 +94,28 @@ export const getKegiatanPenghasilanBadanPPh23 = async (
         code: 200,
         description: 'OK',
       },
-      result: kegiatanPenghasilanBadanPPh23List,
+      result: kegiatanPenghasilanBadanPPh23List.map((data: any) => ({
+        kode_kegiatan_badan: data.kodeKegiatanBadan,
+        tanggal_transaksi: data.tanggalTransaksi.toISOString().split('T')[0],
+        uraian_kegiatan: data.uraianKegiatan,
+        id_kegiatan_anggaran: data.idKegiatanAnggaran,
+        kode_jenis_penghasilan: data.kodeJenisPenghasilan,
+        kode_jenis_pajak: data.kodeJenisPajak,
+        kode_wp_badan: data.kodeWPBadan,
+        penghasilan_bruto: data.penghasilanBruto,
+        kode_objek: data.kodeObjek,
+        tarif_pajak: data.tarifPajak,
+        potongan_pajak: data.potonganPajak,
+        penghasilan_diterima: data.penghasilanDiterima,
+        tanggal_potong_pph: data.tanggalPotongPPh.toISOString().split('T')[0],
+        no_rekening: data.noRekening,
+        nama_rekening: data.namaRekening,
+        narahubung: data.narahubung,
+        jenis_dokumen_terkait: data.jenisDokumenTerkait,
+        no_dokumen_referensi: data.noDokumenReferensi,
+        file_bukti_potong: data.fileBuktiPotong,
+        status: data.status,
+      })),
     });
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' });
@@ -107,20 +128,52 @@ export const updateKegiatanPenghasilanPPh23 = async (
 ) => {
   const { kodeKegiatanBadan } = req.params;
   try {
-    const updateKegiatanPenghasilanPph23 =
-      await kegiatanPenghasilanBadanService.updateKegiatanPenghasilanBadanPPh23(
-        kodeKegiatanBadan,
-        req.body
-      );
+    // Check if a file is uploaded
+    if (!req.file) {
+      // If no file is uploaded, proceed with updating other fields
+      const updateKegiatanPenghasilanPph23 =
+        await kegiatanPenghasilanBadanService.updateKegiatanPenghasilanBadanPPh23(
+          kodeKegiatanBadan,
+          req.body
+        );
 
-    res.json({
-      status: {
-        code: 200,
-        description: 'Kegiatan Penghasilan Badan PPh23 Berhasil Diupdate',
-      },
-      result: updateKegiatanPenghasilanPph23,
-    });
+      res.json({
+        status: {
+          code: 200,
+          description: 'Kegiatan Penghasilan Badan PPh23 Berhasil Diupdate',
+        },
+        result: updateKegiatanPenghasilanPph23,
+      });
+    } else {
+      // If a new file is uploaded, update the file_bukti_potong field
+      const file = req.file;
+
+      const updateKegiatanPenghasilanPph23 =
+        await kegiatanPenghasilanBadanService.updateKegiatanPenghasilanBadanPPh23(
+          kodeKegiatanBadan,
+          {
+            ...req.body,
+            file_bukti_potong: file.filename,
+          }
+        );
+
+      // Delete the old file
+      const filePath = path.join(
+        'public/kegiatan_penghasilan_badan/pph23/file_bukti_potong',
+        req.body.file_bukti_potong
+      );
+      fs.unlinkSync(filePath);
+
+      res.json({
+        status: {
+          code: 200,
+          description: 'Kegiatan Penghasilan Badan PPh23 Berhasil Diupdate',
+        },
+        result: updateKegiatanPenghasilanPph23,
+      });
+    }
   } catch (error: any) {
+    console.log(error.message);
     res.status(500).json({ error: error.message });
   }
 };
@@ -131,9 +184,25 @@ export const deleteKegiatanPenghasilanBadanPPh23 = async (
 ) => {
   const { kodeKegiatanBadan } = req.params;
   try {
+    // Get the file name before deleting the record
+    const kegiatanToDelete =
+      await kegiatanPenghasilanBadanService.getKegiatanPenghasilanBadanPPh23ById(
+        kodeKegiatanBadan
+      );
+
+    // Delete the record
     await kegiatanPenghasilanBadanService.deleteKegiatanPenghasilanBadanPph23(
       kodeKegiatanBadan
     );
+
+    // If the record exists and has a file, delete the associated file
+    if (kegiatanToDelete && kegiatanToDelete.file_bukti_potong) {
+      const filePath = path.join(
+        'public/kegiatan_penghasilan_badan/pph23/file_bukti_potong',
+        kegiatanToDelete.file_bukti_potong
+      );
+      fs.unlinkSync(filePath);
+    }
 
     res.json({
       status: {

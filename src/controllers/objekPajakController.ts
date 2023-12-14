@@ -15,7 +15,8 @@ export const objekPajakPPh23List = async (req: Request, res: Response) => {
       },
       result: objekPajakList,
     });
-  } catch (error) {
+  } catch (error: any) {
+    console.log(error.message);
     res.status(500).json({
       status: {
         code: 500,
