@@ -13,7 +13,13 @@ export const objekPajakPPh23List = async (req: Request, res: Response) => {
         code: 200,
         description: 'OK',
       },
-      result: objekPajakList,
+      result: objekPajakList.map((data: any) => ({
+        kode_objek: data.kodeObjek,
+        kode_jenis_pajak_id: data.kodeJenisPajakId,
+        objek_pajak: data.objekPajak,
+        tarif_npwp: data.tarifNpwp,
+        tarif_non_npwp: data.tarifNonNpwp,
+      })),
     });
   } catch (error: any) {
     console.log(error.message);

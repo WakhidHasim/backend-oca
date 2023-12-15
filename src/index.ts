@@ -8,6 +8,7 @@ import bankRoutes from './routes/bankRoutes';
 import negaraRoutes from './routes/negaraRoutes';
 import objekPajakRoutes from './routes/objekPajakRoutes';
 import pengajuanAnggaranRoutes from './routes/pengajuanAnggaranRoutes';
+import jenisPenghasilanRoutes from './routes/jenisPenghasilanRoutes';
 import wajibPajakBadanUsahaRoutes from './routes/wajibPajakBadanUsahaRoutes';
 import wajibPajakOrangPribadiRoutes from './routes/wajibPajakOrangPribadiRoutes';
 import kegiatanPenghasilanBadanRoutes from './routes/kegaiatanPenghasilanBadanRoutes';
@@ -22,7 +23,16 @@ app.use(validationErrorHandler);
 app.use('/api/agent/login', agentRoutes);
 app.use('/api/bank', authenticateJwtMiddleware, bankRoutes);
 app.use('/api/negara', authenticateJwtMiddleware, negaraRoutes);
-app.use('/api/objek-pajak-pph23', authenticateJwtMiddleware, objekPajakRoutes);
+app.use(
+  '/api/jenis-penghasilan-pph23',
+  authenticateJwtMiddleware,
+  jenisPenghasilanRoutes
+);
+app.use(
+  '/api/objek-pajak-pph23',
+  authenticateJwtMiddleware,
+  jenisPenghasilanRoutes
+);
 app.use(
   '/api/pengajuan-anggaran',
   authenticateJwtMiddleware,
