@@ -1,6 +1,7 @@
 import { prisma } from '../config/database';
 import BadRequestError from '../error/BadRequestError';
 import { handleZodError } from '../error/ZodError';
+import { DateTime } from 'luxon';
 
 import { KegiatanPenghasilanBadan } from '../entities/kegiatanPenghasilanBadan';
 import {
@@ -42,11 +43,24 @@ const padNumber = (number: number, length: number): string => {
 
 const generateKodeKegiatanBadan = async (): Promise<string> => {
   try {
-    const twoDigitYear: string = new Date().getFullYear().toString().slice(-2);
-    const countData = await prisma.kegiatanPenghasilanBadan.count();
-    const paddedNumber: string = padNumber(countData + 1, 5);
-    const code: string = `KBU${twoDigitYear}${paddedNumber}`;
-    return code;
+    // const twoDigitYear: string = new Date().getFullYear().toString().slice(-2);
+    // const countData = await prisma.kegiatanPenghasilanBadan.count();
+    // const paddedNumber: string = padNumber(countData + 1, 5);
+    // const code: string = `KBU${twoDigitYear}${paddedNumber}`;
+
+    const dt = DateTime.utc()
+    const date = dt.toISODate()
+
+    const result = await prisma.$executeRawUnsafe(
+      `SELECT MAX(running_code) as running_code FROM kegiatan_penghasilan_badan WHERE created_at::date BETWEEN ${date} AND ${date}`
+    )
+
+    let runningCode = 0
+    if (result.running_code != null) {
+      runningCode = Number(result.running_code)
+    }
+
+    return `KBU${dt.toFormat("yy")}${String(runningCode).padStart(5, "0")}`
   } catch (error) {
     console.error('Error generating Kode Kegiatan Badan:', error);
     throw error;
