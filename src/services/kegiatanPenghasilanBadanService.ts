@@ -41,7 +41,7 @@ const padNumber = (number: number, length: number): string => {
   return str;
 };
 
-const generateKodeKegiatanBadan = async (): Promise<string> => {
+const generateKodeKegiatanBadan = async (): Promise<{ code: string, running_code: number }> => {
   try {
     // const twoDigitYear: string = new Date().getFullYear().toString().slice(-2);
     // const countData = await prisma.kegiatanPenghasilanBadan.count();
@@ -57,10 +57,13 @@ const generateKodeKegiatanBadan = async (): Promise<string> => {
 
     let runningCode = 0
     if (result.running_code != null) {
-      runningCode = Number(result.running_code)
+      runningCode = Number(result.running_code) + 1
     }
 
-    return `KBU${dt.toFormat("yy")}${String(runningCode).padStart(5, "0")}`
+    return {
+      code: `KBU${dt.toFormat("yy")}${String(runningCode).padStart(5, "0")}`,
+      running_code: runningCode
+    }
   } catch (error) {
     console.error('Error generating Kode Kegiatan Badan:', error);
     throw error;
@@ -96,10 +99,10 @@ export const createKegiatanPenghasilanBadanPPh23 = async (
 
   const requestBody = validator.data;
 
-  const kodeKegiatanBadan = await generateKodeKegiatanBadan();
+  const { code, running_code } = await generateKodeKegiatanBadan();
   const existingKodeKegiatanBadan =
     await prisma.kegiatanPenghasilanBadan.findUnique({
-      where: { kodeKegiatanBadan: kodeKegiatanBadan },
+      where: { kodeKegiatanBadan: code },
     });
 
   if (existingKodeKegiatanBadan) {
@@ -157,7 +160,7 @@ export const createKegiatanPenghasilanBadanPPh23 = async (
 
   const craetePPh23 = await prisma.kegiatanPenghasilanBadan.create({
     data: {
-      kodeKegiatanBadan: kodeKegiatanBadan,
+      kodeKegiatanBadan: code,
       tanggalTransaksi: requestBody.tanggalTransaksi,
       uraianKegiatan: requestBody.uraianKegiatan,
       idKegiatanAnggaran: requestBody.idKegiatanAnggaran,
@@ -176,6 +179,7 @@ export const createKegiatanPenghasilanBadanPPh23 = async (
       jenisDokumenTerkait: requestBody.jenisDokumenTerkait,
       noDokumenReferensi: requestBody.noDokumenReferensi,
       fileBuktiPotong: requestBody.fileBuktiPotong,
+      running_code: running_code,
       status: 'Entry',
     },
   });
