@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 
 import { authenticateJwtMiddleware } from './middleware/authMiddleware';
 import { validationErrorHandler } from './middleware/errorMiddleware';
@@ -19,6 +20,12 @@ const PORT = 3000;
 
 app.use(express.json());
 app.use(validationErrorHandler);
+
+app.use(
+  cors({
+    origin: 'http://localhost:5173',
+  })
+);
 
 app.use('/api/agent/login', agentRoutes);
 app.use('/api/bank', authenticateJwtMiddleware, bankRoutes);
@@ -43,11 +50,7 @@ app.use(
   authenticateJwtMiddleware,
   kegiatanPenghasilanBadanRoutes
 );
-app.use(
-  '/api/wajib-pajak-badan-usaha',
-  authenticateJwtMiddleware,
-  wajibPajakBadanUsahaRoutes
-);
+app.use('/api/wajib-pajak-badan-usaha', wajibPajakBadanUsahaRoutes);
 app.use('/api/wajib-pajak-orang-pribadi', wajibPajakOrangPribadiRoutes);
 app.use('/api/upload', uploadRoutes);
 
