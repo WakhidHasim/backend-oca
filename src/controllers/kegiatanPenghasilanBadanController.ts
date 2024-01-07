@@ -10,14 +10,20 @@ import * as kegiatanPenghasilanBadanService from '../services/kegiatanPenghasila
 const storageFilePPh23 = multer.diskStorage({
   destination: (req, file, cb) => {
     if (file.fieldname === 'invoice') {
-      cb(null, 'public/kegiatan_penghasilan_badan/pph23/invoice');
+      const path = 'public/kegiatan_penghasilan_badan/pph23/invoice'
+      fs.mkdirSync(path, { recursive: true })
+
+      cb(null, path);
     } else if (file.fieldname === 'fakturPajak') {
-      cb(null, 'public/kegiatan_penghasilan_badan/pph23/faktur_pajak');
+      const path = 'public/kegiatan_penghasilan_badan/pph23/faktur_pajak'
+      fs.mkdirSync(path, { recursive: true })
+
+      cb(null, path);
     } else if (file.fieldname === 'dokumenKerjasamaKegiatan') {
-      cb(
-        null,
-        'public/kegiatan_penghasilan_badan/pph23/dokumen_kerjasama_kegiatan'
-      );
+      const path = 'public/kegiatan_penghasilan_badan/pph23/dokumen_kerjasama_kegiatan'
+      fs.mkdirSync(path, { recursive: true })
+
+      cb(null, path);
     }
   },
   filename: (req, file, cb) => {
@@ -34,14 +40,20 @@ const storageFilePPh23 = multer.diskStorage({
 const storageFilePPh4 = multer.diskStorage({
   destination: (req, file, cb) => {
     if (file.fieldname === 'invoice') {
-      cb(null, 'public/kegiatan_penghasilan_badan/pph4_ayat_2/invoice');
+      const path = 'public/kegiatan_penghasilan_badan/pph4_ayat_2/invoice'
+      fs.mkdirSync(path, { recursive: true })
+
+      cb(null, path);
     } else if (file.fieldname === 'fakturPajak') {
-      cb(null, 'public/kegiatan_penghasilan_badan/pph4_ayat_2/faktur_pajak');
+      const path = 'public/kegiatan_penghasilan_badan/pph4_ayat_2/faktur_pajak'
+      fs.mkdirSync(path, { recursive: true })
+
+      cb(null, path);
     } else if (file.fieldname === 'dokumenKerjasamaKegiatan') {
-      cb(
-        null,
-        'public/kegiatan_penghasilan_badan/pph4_ayat_2/dokumen_kerjasama_kegiatan'
-      );
+      const path = 'public/kegiatan_penghasilan_badan/pph4_ayat_2/dokumen_kerjasama_kegiatan'
+      fs.mkdirSync(path, { recursive: true })
+
+      cb(null, path);
     }
   },
   filename: (req, file, cb) => {
@@ -159,6 +171,10 @@ export const createPPh23 = async (req: Request, res: Response) => {
         result: error.message,
       });
     }
+
+    console.log(error)
+
+    return res.status(500).json({ message: "internal server error" })
   }
 };
 
@@ -185,6 +201,11 @@ export const getAllPph23 = async (req: Request, res: Response) => {
         result: error.message,
       });
     }
+
+    // send to logger if needed
+    console.log(error)
+
+    return res.status(500).json({ message: "internal server error" })
   }
 };
 
@@ -212,6 +233,10 @@ export const getPPh23ById = async (req: Request, res: Response) => {
         result: error.message,
       });
     }
+
+    console.log(error)
+
+    return res.status(500).json({ message: "internal server error" })
   }
 };
 
@@ -323,6 +348,10 @@ export const updatePPh23 = async (req: Request, res: Response) => {
         result: error.message,
       });
     }
+
+    console.log(error)
+
+    return res.status(500).json({ message: "internal server error" })
   }
 };
 
@@ -379,6 +408,10 @@ export const deletePPh23 = async (req: Request, res: Response) => {
         result: error.message,
       });
     }
+
+    console.log(error)
+
+    return res.status(500).json({ message: "internal server error" })
   }
 };
 
@@ -425,6 +458,9 @@ export const createPPh4Ayat2 = async (req: Request, res: Response) => {
         result: error.message,
       });
     }
+    console.log(error)
+
+    return res.status(500).json({ message: "internal server error" })
   }
 };
 
@@ -450,6 +486,10 @@ export const getAllPPh4Ayat2 = async (req: Request, res: Response) => {
         result: error.message,
       });
     }
+
+    console.log(error)
+
+    return res.status(500).json({ message: "internal server error" })
   }
 };
 
@@ -476,6 +516,10 @@ export const getPPh4Ayat2ById = async (req: Request, res: Response) => {
         result: error.message,
       });
     }
+
+    console.log(error)
+
+    return res.status(500).json({ message: "internal server error" })
   }
 };
 
@@ -531,5 +575,9 @@ export const deletePPh4Ayat2 = async (req: Request, res: Response) => {
         result: error.message,
       });
     }
+
+    console.log(error)
+
+    return res.status(500).json({ message: "internal server error" })
   }
 };
