@@ -16,7 +16,7 @@ export const authenticateJwtMiddleware = (
   res: Response,
   next: NextFunction
 ) => {
-  const token = req.header('Authorization')?.replace('Bearer ', '');
+  const token = req.cookies.token; // Read token from cookie
 
   if (!token) {
     return res.status(401).json({ error: 'Unauthorized: Missing token' });

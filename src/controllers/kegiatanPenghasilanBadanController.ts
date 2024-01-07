@@ -1,205 +1,361 @@
-import { Request, Response } from 'express';
+import { Request, Response, Express } from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 
-import * as kegiatanPenghasilanBadanService from '../services/kegiatanPenghasilanBadanService';
-import HttpError from '../error/HttpError';
+import BadRequestError from '../error/BadRequestError';
 
-const storageFileBuktiPotong = multer.diskStorage({
+import * as kegiatanPenghasilanBadanService from '../services/kegiatanPenghasilanBadanService';
+
+const storageFilePPh23 = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadPath =
-      'public/kegiatan_penghasilan_badan/pph23/file_bukti_potong';
-    fs.mkdirSync(uploadPath, { recursive: true });
-    cb(null, uploadPath);
+    if (file.fieldname === 'invoice') {
+      cb(null, 'public/kegiatan_penghasilan_badan/pph23/invoice');
+    } else if (file.fieldname === 'fakturPajak') {
+      cb(null, 'public/kegiatan_penghasilan_badan/pph23/faktur_pajak');
+    } else if (file.fieldname === 'dokumenKerjasamaKegiatan') {
+      cb(
+        null,
+        'public/kegiatan_penghasilan_badan/pph23/dokumen_kerjasama_kegiatan'
+      );
+    }
   },
   filename: (req, file, cb) => {
-    const fileName = `${Date.now()}-${file.originalname}`;
-    cb(null, fileName);
+    if (file.fieldname === 'invoice') {
+      cb(null, file.fieldname + Date.now() + path.extname(file.originalname));
+    } else if (file.fieldname === 'fakturPajak') {
+      cb(null, file.fieldname + Date.now() + path.extname(file.originalname));
+    } else if (file.fieldname === 'dokumenKerjasamaKegiatan') {
+      cb(null, file.fieldname + Date.now() + path.extname(file.originalname));
+    }
   },
 });
 
-const uploadFileBuktiPotong = multer({
-  storage: storageFileBuktiPotong,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB file size limit
+const storageFilePPh4 = multer.diskStorage({
+  destination: (req, file, cb) => {
+    if (file.fieldname === 'invoice') {
+      cb(null, 'public/kegiatan_penghasilan_badan/pph4_ayat_2/invoice');
+    } else if (file.fieldname === 'fakturPajak') {
+      cb(null, 'public/kegiatan_penghasilan_badan/pph4_ayat_2/faktur_pajak');
+    } else if (file.fieldname === 'dokumenKerjasamaKegiatan') {
+      cb(
+        null,
+        'public/kegiatan_penghasilan_badan/pph4_ayat_2/dokumen_kerjasama_kegiatan'
+      );
+    }
+  },
+  filename: (req, file, cb) => {
+    if (file.fieldname === 'invoice') {
+      cb(null, file.fieldname + Date.now() + path.extname(file.originalname));
+    } else if (file.fieldname === 'fakturPajak') {
+      cb(null, file.fieldname + Date.now() + path.extname(file.originalname));
+    } else if (file.fieldname === 'dokumenKerjasamaKegiatan') {
+      cb(null, file.fieldname + Date.now() + path.extname(file.originalname));
+    }
+  },
 });
-export const createKegiatanPenghasilanBadanPPh23 = async (
+
+function checkFileType(
   req: Request,
-  res: Response
-) => {
+  file: Express.Multer.File,
+  cb: (error: Error | null, isPdf: boolean) => void
+) {
+  if (
+    file.fieldname === 'invoice' ||
+    file.fieldname === 'fakturPajak' ||
+    file.fieldname === 'dokumenKerjasamaKegiatan'
+  ) {
+    if (file.mimetype === 'application/pdf') {
+      cb(null, true);
+    } else {
+      cb(null, false);
+    }
+  } else {
+    cb(null, false);
+  }
+}
+
+const uploadPPh23 = multer({
+  storage: storageFilePPh23,
+  limits: {
+    fileSize: 1024 * 1024 * 10,
+  },
+  fileFilter: (req, file, cb) => {
+    checkFileType(req, file, (error, isPdf) => {
+      if (error) {
+        return cb(error);
+      }
+      cb(null, isPdf);
+    });
+  },
+});
+
+const uploadPPh4 = multer({
+  storage: storageFilePPh4,
+  limits: {
+    fileSize: 1024 * 1024 * 10,
+  },
+  fileFilter: (req, file, cb) => {
+    checkFileType(req, file, (error, isPdf) => {
+      if (error) {
+        return cb(error);
+      }
+      cb(null, isPdf);
+    });
+  },
+});
+
+const uploadFieldsPPh23 = uploadPPh23.fields([
+  { name: 'invoice', maxCount: 1 },
+  { name: 'fakturPajak', maxCount: 1 },
+  { name: 'dokumenKerjasamaKegiatan', maxCount: 1 },
+]);
+
+const uploadFieldsPPh4 = uploadPPh4.fields([
+  { name: 'invoice', maxCount: 1 },
+  { name: 'fakturPajak', maxCount: 1 },
+  { name: 'dokumenKerjasamaKegiatan', maxCount: 1 },
+]);
+
+//
+export const createPPh23 = async (req: Request, res: Response) => {
   try {
-    const controller = async () => {
-      if (!req.file) return res.status(400).json({ message: 'file required' });
+    uploadFieldsPPh23(req, res, async (err) => {
+      if (err) {
+        return res.status(400).json({ message: err.message });
+      }
 
-      const file = req.file;
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
-      const kegaiatanPenghasilanBadanPPh23 =
-        await kegiatanPenghasilanBadanService.createKegiatanPenghasilanBadanPPh23(
-          {
-            ...req.body,
-            penghasilan_bruto: Number(req.body?.penghasilan_bruto),
-            kode_jenis_penghasilan: Number(req.body?.kode_jenis_penghasilan),
-            file_bukti_potong: file.filename,
-          }
-        );
+      const invoiceFile = files['invoice']?.[0];
+      const fakturPajakFile = files['fakturPajak']?.[0];
+      const dokumenKerjasamaKegiatanFile =
+        files['dokumenKerjasamaKegiatan']?.[0];
+
+      const createPPh23 = await kegiatanPenghasilanBadanService.createPPh23({
+        ...req.body,
+        kodeJenisPenghasilan: Number(req.body?.kodeJenisPenghasilan),
+        penghasilanBruto: Number(req.body?.penghasilanBruto),
+        invoice: invoiceFile?.filename,
+        fakturPajak: fakturPajakFile?.filename,
+        dokumenKerjasamaKegiatan: dokumenKerjasamaKegiatanFile?.filename,
+      });
 
       res.json({
         status: {
           code: 200,
-          description:
-            'Data Kegiatan Penghasilan Badan PPh23 berhasil ditambahkan !',
+          description: 'Ok',
         },
-        result: kegaiatanPenghasilanBadanPPh23,
+        result: createPPh23,
       });
-    };
-
-    const multerHandler = uploadFileBuktiPotong.single('file_bukti_potong');
-    multerHandler(req, res, controller);
+    });
   } catch (error) {
-    console.log(Object.getPrototypeOf(error));
-    if (error instanceof HttpError) {
-      return res.status(error.statusCode).json({
+    if (error instanceof BadRequestError) {
+      res.status(400).json({
         status: {
-          code: error.statusCode,
-          description: error.message,
+          code: 400,
+          description: 'Bad Request',
         },
-        result: null,
+        result: error.message,
       });
     }
-
-    const e = error as Error;
-    console.log(e);
-    res.status(500).json({
-      status: {
-        code: 500,
-        description: e.message,
-      },
-      result: null,
-    });
   }
 };
 
-export const getKegiatanPenghasilanBadanPPh23 = async (
-  req: Request,
-  res: Response
-) => {
+export const getAllPph23 = async (req: Request, res: Response) => {
   try {
     const queryParameters = req.query;
-    const kegiatanPenghasilanBadanPPh23List =
-      await kegiatanPenghasilanBadanService.getKegiatanPenghasilanBadanPPh23List(
-        queryParameters
-      );
+    const getAllPPh23 = await kegiatanPenghasilanBadanService.getAllPPh23(
+      queryParameters
+    );
     res.json({
       status: {
         code: 200,
         description: 'OK',
       },
-      result: kegiatanPenghasilanBadanPPh23List.map((data: any) => ({
-        kode_kegiatan_badan: data.kodeKegiatanBadan,
-        tanggal_transaksi: data.tanggalTransaksi.toISOString().split('T')[0],
-        uraian_kegiatan: data.uraianKegiatan,
-        id_kegiatan_anggaran: data.idKegiatanAnggaran,
-        kode_jenis_penghasilan: data.kodeJenisPenghasilan,
-        kode_jenis_pajak: data.kodeJenisPajak,
-        kode_wp_badan: data.kodeWPBadan,
-        penghasilan_bruto: data.penghasilanBruto,
-        kode_objek: data.kodeObjek,
-        tarif_pajak: data.tarifPajak,
-        potongan_pajak: data.potonganPajak,
-        penghasilan_diterima: data.penghasilanDiterima,
-        tanggal_potong_pph: data.tanggalPotongPPh.toISOString().split('T')[0],
-        no_rekening: data.noRekening,
-        nama_rekening: data.namaRekening,
-        narahubung: data.narahubung,
-        jenis_dokumen_terkait: data.jenisDokumenTerkait,
-        no_dokumen_referensi: data.noDokumenReferensi,
-        file_bukti_potong: data.fileBuktiPotong,
-        status: data.status,
-      })),
+      result: getAllPPh23,
     });
   } catch (error) {
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-};
-
-export const updateKegiatanPenghasilanPPh23 = async (
-  req: Request,
-  res: Response
-) => {
-  const { kodeKegiatanBadan } = req.params;
-  try {
-    // Check if a file is uploaded
-    if (!req.file) {
-      // If no file is uploaded, proceed with updating other fields
-      const updateKegiatanPenghasilanPph23 =
-        await kegiatanPenghasilanBadanService.updateKegiatanPenghasilanBadanPPh23(
-          kodeKegiatanBadan,
-          req.body
-        );
-
-      res.json({
+    if (error instanceof BadRequestError) {
+      res.status(400).json({
         status: {
-          code: 200,
-          description: 'Kegiatan Penghasilan Badan PPh23 Berhasil Diupdate',
+          code: 400,
+          description: 'Bad Request',
         },
-        result: updateKegiatanPenghasilanPph23,
-      });
-    } else {
-      // If a new file is uploaded, update the file_bukti_potong field
-      const file = req.file;
-
-      const updateKegiatanPenghasilanPph23 =
-        await kegiatanPenghasilanBadanService.updateKegiatanPenghasilanBadanPPh23(
-          kodeKegiatanBadan,
-          {
-            ...req.body,
-            file_bukti_potong: file.filename,
-          }
-        );
-
-      // Delete the old file
-      const filePath = path.join(
-        'public/kegiatan_penghasilan_badan/pph23/file_bukti_potong',
-        req.body.file_bukti_potong
-      );
-      fs.unlinkSync(filePath);
-
-      res.json({
-        status: {
-          code: 200,
-          description: 'Kegiatan Penghasilan Badan PPh23 Berhasil Diupdate',
-        },
-        result: updateKegiatanPenghasilanPph23,
+        result: error.message,
       });
     }
-  } catch (error: any) {
-    console.log(error.message);
-    res.status(500).json({ error: error.message });
   }
 };
 
-export const deleteKegiatanPenghasilanBadanPPh23 = async (
-  req: Request,
-  res: Response
-) => {
-  const { kodeKegiatanBadan } = req.params;
+export const getPPh23ById = async (req: Request, res: Response) => {
   try {
-    // Get the file name before deleting the record
-    const kegiatanToDelete =
-      await kegiatanPenghasilanBadanService.getKegiatanPenghasilanBadanPPh23ById(
-        kodeKegiatanBadan
-      );
-
-    // Delete the record
-    await kegiatanPenghasilanBadanService.deleteKegiatanPenghasilanBadanPph23(
+    const { kodeKegiatanBadan } = req.params;
+    const getPPh23ById = await kegiatanPenghasilanBadanService.getPPh23ById(
       kodeKegiatanBadan
     );
 
-    // If the record exists and has a file, delete the associated file
-    if (kegiatanToDelete && kegiatanToDelete.file_bukti_potong) {
+    res.json({
+      status: {
+        code: 200,
+        description: 'OK',
+      },
+      result: getPPh23ById,
+    });
+  } catch (error) {
+    if (error instanceof BadRequestError) {
+      res.status(400).json({
+        status: {
+          code: 400,
+          description: 'Bad Request',
+        },
+        result: error.message,
+      });
+    }
+  }
+};
+
+export const updatePPh23 = async (req: Request, res: Response) => {
+  try {
+    const { kodeKegiatanBadan } = req.params;
+
+    const getPPh23ById = await kegiatanPenghasilanBadanService.getPPh23ById(
+      kodeKegiatanBadan
+    );
+
+    if (getPPh23ById) {
+      const updatedData = req.body;
+
+      let invoiceFile = '';
+      let fakturPajakFile = '';
+      let dokumenKerjasamaKegiatanFile = '';
+
+      const handleFileUpload = async (fieldName: string, filePath: string) => {
+        if (filePath) {
+          await uploadFieldsPPh23(req, res, (err: any) => {
+            if (err) {
+              throw new Error('File upload error: ' + err.message);
+            }
+
+            const files = req.files as {
+              [fieldname: string]: Express.Multer.File[];
+            };
+            if (fieldName === 'invoice') {
+              invoiceFile = files['invoice']?.[0]?.filename;
+            } else if (fieldName === 'fakturPajak') {
+              fakturPajakFile = files['fakturPajak']?.[0]?.filename;
+            } else if (fieldName === 'dokumenKerjasamaKegiatan') {
+              dokumenKerjasamaKegiatanFile =
+                files['dokumenKerjasamaKegiatan']?.[0]?.filename;
+            }
+          });
+        }
+      };
+
+      if (updatedData.invoice) {
+        if (getPPh23ById && getPPh23ById.invoice) {
+          const filePath = path.join(
+            'public/kegiatan_penghasilan_badan/pph23/invoice',
+            getPPh23ById.invoice
+          );
+          fs.unlinkSync(filePath);
+        }
+        await handleFileUpload('invoice', updatedData.invoice);
+      } else {
+        invoiceFile = getPPh23ById.invoice;
+      }
+
+      if (updatedData.fakturPajak) {
+        if (getPPh23ById && getPPh23ById.fakturPajak) {
+          const filePath = path.join(
+            'public/kegiatan_penghasilan_badan/pph23/faktur_pajak',
+            getPPh23ById.fakturPajak
+          );
+          fs.unlinkSync(filePath);
+        }
+        await handleFileUpload('fakturPajak', updatedData.fakturPajak);
+      } else {
+        fakturPajakFile = getPPh23ById.fakturPajak;
+      }
+
+      if (updatedData.dokumenKerjasamaKegiatan) {
+        if (getPPh23ById && getPPh23ById.dokumenKerjasamaKegiatan) {
+          const filePath = path.join(
+            'public/kegiatan_penghasilan_badan/pph23/dokumen_kerjasama_kegiatan',
+            getPPh23ById.dokumenKerjasamaKegiatan
+          );
+          fs.unlinkSync(filePath);
+        }
+        await handleFileUpload(
+          'dokumenKerjasamaKegiatan',
+          updatedData.dokumenKerjasamaKegiatan
+        );
+      } else {
+        dokumenKerjasamaKegiatanFile = getPPh23ById.dokumenKerjasamaKegiatan;
+      }
+
+      const updatedKegiatanOP =
+        await kegiatanPenghasilanBadanService.updatePPh23(
+          kodeKegiatanBadan,
+          updatedData,
+          parseInt(updatedData?.kodeJenisPenghasilan),
+          parseInt(updatedData?.penghasilanBruto),
+          invoiceFile,
+          fakturPajakFile,
+          dokumenKerjasamaKegiatanFile
+        );
+
+      res.json({
+        status: {
+          code: 200,
+          description: 'OK',
+        },
+        result: updatedKegiatanOP,
+      });
+    }
+  } catch (error) {
+    if (error instanceof BadRequestError) {
+      res.status(400).json({
+        status: {
+          code: 400,
+          description: 'Bad Request',
+        },
+        result: error.message,
+      });
+    }
+  }
+};
+
+export const deletePPh23 = async (req: Request, res: Response) => {
+  try {
+    const { kodeKegiatanBadan } = req.params;
+
+    const getPPh23ById = await kegiatanPenghasilanBadanService.getPPh23ById(
+      kodeKegiatanBadan
+    );
+
+    await kegiatanPenghasilanBadanService.deletePPh23(kodeKegiatanBadan);
+
+    if (getPPh23ById && getPPh23ById.invoice) {
       const filePath = path.join(
-        'public/kegiatan_penghasilan_badan/pph23/file_bukti_potong',
-        kegiatanToDelete.file_bukti_potong
+        'public/kegiatan_penghasilan_badan/pph23/invoice',
+        getPPh23ById.invoice
+      );
+      fs.unlinkSync(filePath);
+    }
+
+    if (getPPh23ById && getPPh23ById.fakturPajak) {
+      const filePath = path.join(
+        'public/kegiatan_penghasilan_badan/pph23/faktur_pajak',
+        getPPh23ById.fakturPajak
+      );
+      fs.unlinkSync(filePath);
+    }
+
+    if (getPPh23ById && getPPh23ById.dokumenKerjasamaKegiatan) {
+      const filePath = path.join(
+        'public/kegiatan_penghasilan_badan/pph23/dokumen_kerjasama_kegiatan',
+        getPPh23ById.dokumenKerjasamaKegiatan
       );
       fs.unlinkSync(filePath);
     }
@@ -213,7 +369,167 @@ export const deleteKegiatanPenghasilanBadanPPh23 = async (
         message: 'Deleted successfully',
       },
     });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error) {
+    if (error instanceof BadRequestError) {
+      res.status(400).json({
+        status: {
+          code: 400,
+          description: 'Bad Request',
+        },
+        result: error.message,
+      });
+    }
+  }
+};
+
+// PPh 4 ayat 2
+export const createPPh4Ayat2 = async (req: Request, res: Response) => {
+  try {
+    uploadFieldsPPh4(req, res, async (err) => {
+      if (err) {
+        return res.status(400).json({ message: err.message });
+      }
+
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+
+      const invoiceFile = files['invoice']?.[0];
+      const fakturPajakFile = files['fakturPajak']?.[0];
+      const dokumenKerjasamaKegiatanFile =
+        files['dokumenKerjasamaKegiatan']?.[0];
+
+      const createPPh4Ayat2 =
+        await kegiatanPenghasilanBadanService.createPPh4Ayat2({
+          ...req.body,
+          kodeJenisPenghasilan: Number(req.body?.kodeJenisPenghasilan),
+          penghasilanBruto: Number(req.body?.penghasilanBruto),
+          invoice: invoiceFile?.filename,
+          fakturPajak: fakturPajakFile?.filename,
+          dokumenKerjasamaKegiatan: dokumenKerjasamaKegiatanFile?.filename,
+        });
+
+      res.json({
+        status: {
+          code: 200,
+          description: 'Ok',
+        },
+        result: createPPh4Ayat2,
+      });
+    });
+  } catch (error) {
+    if (error instanceof BadRequestError) {
+      res.status(400).json({
+        status: {
+          code: 400,
+          description: 'Bad Request',
+        },
+        result: error.message,
+      });
+    }
+  }
+};
+
+export const getAllPPh4Ayat2 = async (req: Request, res: Response) => {
+  try {
+    const queryParameters = req.query;
+    const getAllPPhAyat2 =
+      await kegiatanPenghasilanBadanService.getAllPPh4Ayat2(queryParameters);
+    res.json({
+      status: {
+        code: 200,
+        description: 'OK',
+      },
+      result: getAllPPhAyat2,
+    });
+  } catch (error) {
+    if (error instanceof BadRequestError) {
+      res.status(400).json({
+        status: {
+          code: 400,
+          description: 'Bad Request',
+        },
+        result: error.message,
+      });
+    }
+  }
+};
+
+export const getPPh4Ayat2ById = async (req: Request, res: Response) => {
+  try {
+    const { kodeKegiatanBadan } = req.params;
+    const getPPh4Ayat2ById =
+      await kegiatanPenghasilanBadanService.getPPh4Ayat2ById(kodeKegiatanBadan);
+
+    res.json({
+      status: {
+        code: 200,
+        description: 'OK',
+      },
+      result: getPPh4Ayat2ById,
+    });
+  } catch (error) {
+    if (error instanceof BadRequestError) {
+      res.status(400).json({
+        status: {
+          code: 400,
+          description: 'Bad Request',
+        },
+        result: error.message,
+      });
+    }
+  }
+};
+
+export const deletePPh4Ayat2 = async (req: Request, res: Response) => {
+  try {
+    const { kodeKegiatanBadan } = req.params;
+
+    const getPPh4Ayat2ById =
+      await kegiatanPenghasilanBadanService.getPPh4Ayat2ById(kodeKegiatanBadan);
+
+    await kegiatanPenghasilanBadanService.deletePPh4Ayat2(kodeKegiatanBadan);
+
+    if (getPPh4Ayat2ById && getPPh4Ayat2ById.invoice) {
+      const filePath = path.join(
+        'public/kegiatan_penghasilan_badan/pph4_ayat_2/invoice',
+        getPPh4Ayat2ById.invoice
+      );
+      fs.unlinkSync(filePath);
+    }
+
+    if (getPPh4Ayat2ById && getPPh4Ayat2ById.fakturPajak) {
+      const filePath = path.join(
+        'public/kegiatan_penghasilan_badan/pph4_ayat_2/faktur_pajak',
+        getPPh4Ayat2ById.fakturPajak
+      );
+      fs.unlinkSync(filePath);
+    }
+
+    if (getPPh4Ayat2ById && getPPh4Ayat2ById.dokumenKerjasamaKegiatan) {
+      const filePath = path.join(
+        'public/kegiatan_penghasilan_badan/pph4_ayat_2/dokumen_kerjasama_kegiatan',
+        getPPh4Ayat2ById.dokumenKerjasamaKegiatan
+      );
+      fs.unlinkSync(filePath);
+    }
+
+    res.json({
+      status: {
+        code: 200,
+        description: 'OK',
+      },
+      result: {
+        message: 'Deleted successfully',
+      },
+    });
+  } catch (error) {
+    if (error instanceof BadRequestError) {
+      res.status(400).json({
+        status: {
+          code: 400,
+          description: 'Bad Request',
+        },
+        result: error.message,
+      });
+    }
   }
 };

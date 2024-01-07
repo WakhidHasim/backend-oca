@@ -17,12 +17,7 @@ export const jenisPenghasilanListPPh23 = async (
         code: 200,
         description: 'OK',
       },
-      result: jenisPenghasilanList.map((data: any) => ({
-        kode_jenis_penghasilan: data.kodeJenisPenghasilan,
-        kode_akun: data.kodeAkun,
-        jenis_pajak_terkait: data.jenisPajakTerkait,
-        jenis_penghasilan: data.jenisPenghasilan,
-      })),
+      result: jenisPenghasilanList,
     });
   } catch (error: any) {
     console.log(error.message);

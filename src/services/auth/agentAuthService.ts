@@ -1,4 +1,5 @@
 require('dotenv').config();
+import { Response } from 'express';
 import axios, { AxiosResponse } from 'axios';
 import jwt from 'jsonwebtoken';
 
@@ -27,7 +28,7 @@ type AxiosAgentAuthResponse = {
   };
 };
 
-export const handleAgentLogin = async (param: agentLoginIn) => {
+export const handleAgentLogin = async (param: agentLoginIn, res: Response) => {
   const ocaUrl = get_EXTERNAL_OCA_BASE_URL() + '/auth';
   try {
     const authServiceResponse = await axios.post<
@@ -82,7 +83,6 @@ export const handleAgentLogin = async (param: agentLoginIn) => {
     }
 
     const secretKey = process.env.JWT_SECRET_KEY ?? '';
-
     const expiresIn = 6000;
 
     const jwtToken = jwt.sign(
@@ -97,6 +97,8 @@ export const handleAgentLogin = async (param: agentLoginIn) => {
         expiresIn: expiresIn,
       }
     );
+
+    res.cookie('token', jwtToken, { httpOnly: true });
 
     return {
       status: {
@@ -116,10 +118,13 @@ export const handleAgentLogin = async (param: agentLoginIn) => {
         error.response.data
       );
 
-      if (error.response.data.result === 'User id atau password salah !!!') {
-        throw new Error('User id atau password salah !!!');
-      }
+      return {
+        status: {
+          code: 401,
+          description: 'Unauthorized',
+        },
+        result: 'User id atau password salah !!!',
+      };
     }
-    throw new Error('Authentication failed');
   }
 };
