@@ -170,6 +170,7 @@ export const createPPh23 = async (req: Request, res: Response) => {
         },
         result: error.message,
       });
+      return
     }
 
     console.log(error)
@@ -200,6 +201,7 @@ export const getAllPph23 = async (req: Request, res: Response) => {
         },
         result: error.message,
       });
+      return
     }
 
     // send to logger if needed
@@ -232,6 +234,7 @@ export const getPPh23ById = async (req: Request, res: Response) => {
         },
         result: error.message,
       });
+      return
     }
 
     console.log(error)
@@ -347,6 +350,7 @@ export const updatePPh23 = async (req: Request, res: Response) => {
         },
         result: error.message,
       });
+      return
     }
 
     console.log(error)
@@ -407,6 +411,7 @@ export const deletePPh23 = async (req: Request, res: Response) => {
         },
         result: error.message,
       });
+      return
     }
 
     console.log(error)
@@ -457,6 +462,7 @@ export const createPPh4Ayat2 = async (req: Request, res: Response) => {
         },
         result: error.message,
       });
+      return
     }
     console.log(error)
 
@@ -485,6 +491,7 @@ export const getAllPPh4Ayat2 = async (req: Request, res: Response) => {
         },
         result: error.message,
       });
+      return
     }
 
     console.log(error)
@@ -515,6 +522,7 @@ export const getPPh4Ayat2ById = async (req: Request, res: Response) => {
         },
         result: error.message,
       });
+      return
     }
 
     console.log(error)
@@ -574,6 +582,7 @@ export const deletePPh4Ayat2 = async (req: Request, res: Response) => {
         },
         result: error.message,
       });
+      return
     }
 
     console.log(error)
