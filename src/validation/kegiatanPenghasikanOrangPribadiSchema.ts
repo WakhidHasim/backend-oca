@@ -6,4 +6,5 @@ export const createKegiatanOrangPribaiSchema = z.object({
   kodeJenisPenghasilan: z.number(),
   picPencairanPenghasilan: z.string(),
   mintaBillingSendiri: z.boolean(),
+  idl: z.string(),
 });

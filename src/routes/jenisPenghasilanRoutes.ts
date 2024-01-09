@@ -4,6 +4,11 @@ import * as jenisPenghasilanController from '../controllers/jenisPenghasilanCont
 
 const router = express.Router();
 
-router.get('/', jenisPenghasilanController.jenisPenghasilanListPPh23);
+router.get('/pph21', jenisPenghasilanController.jenisPenghasilanListPPh21);
+router.get('/pph23', jenisPenghasilanController.jenisPenghasilanListPPh23);
+router.get(
+  '/pph4-ayat-2',
+  jenisPenghasilanController.jenisPenghasilanListPPh4Ayat2
+);
 
 export default router;

@@ -91,10 +91,9 @@ model ObjekPajak {
   kodeObjek                    String                         @id @map("kode_objek") @db.VarChar(20)
   kodeJenisPajakId             Int                            @map("kode_jenis_pajak_id") @db.Integer
   jenisPajak                   JenisPajak                     @relation(fields: [kodeJenisPajakId], references: [kodeJenisPajak])
-  objekPajak                   String                         @map("objek_pajak") @db.VarChar(255)
+  objekPajak                   String                         @map("objek_pajak") @db.Text
   tarifNpwp                    Float                          @map("tarif_npwp")
   tarifNonNpwp                 Float                          @map("tarif_non_npwp")
-  InventarisasiPajak           InventarisasiPajak[]
   LogItemKegiatanPenghasilanOP LogItemKegiatanPenghasilanOP[]
 
   @@map("objek_pajak")
@@ -148,7 +147,6 @@ model PengajuanAnggaran {
   metodePengajuan          String                     @map("metode_pengajuan") @db.VarChar(20)
   statusPengajuan          String                     @map("status_pengajuan") @db.VarChar(100)
   tanggalPengajuan         DateTime                   @map("tanggal_pengajuan")
-  InventarisasiPajak       InventarisasiPajak[]
   LogKegiatanPenghasilanOP LogKegiatanPenghasilanOP[]
 
   @@map("pengajuan_anggaran")
@@ -157,7 +155,7 @@ model PengajuanAnggaran {
 model WajibPajakOrangPribadi {
   kodeWPOP                     BigInt                         @id @default(autoincrement()) @map("kode_wpop")
   nama                         String                         @db.VarChar(100)
-  email                        String                         @unique @db.VarChar(200)
+  email                        String                         @db.VarChar(200)
   password                     String?                        @db.VarChar(255)
   kewarganegaraan              String                         @db.VarChar(5)
   namaNegara                   String                         @map("nama_negara") @db.VarChar(100)
@@ -186,7 +184,7 @@ model WajibPajakOrangPribadi {
 model WajibPajakBadanUsaha {
   kodeWPBadan            String    @id @map("kode_wpbadan") @db.VarChar(50)
   namaBadan              String    @map("nama_badan") @db.VarChar(100)
-  email                  String    @unique @db.VarChar(200)
+  email                  String    @db.VarChar(200)
   npwp                   String?   @db.VarChar(30)
   namaNpwp               String?   @map("nama_npwp") @db.VarChar(100)
   kotaNpwp               String?   @map("kota_npwp") @db.VarChar(50)
@@ -288,17 +286,16 @@ model KegiatanPenghasilanBadan {
 }
 
 model InventarisasiPajak {
-  idInventarisasiPajak String            @id @map("id_inventarisasi_pajak") @db.VarChar(100)
-  uraianKegiatan       String            @map("uraian_kegiatan") @db.VarChar(200)
-  idKegiatanAnggaran   String            @map("id_kegiatan_anggaran") @db.VarChar(20)
-  pengajuanAnggaran    PengajuanAnggaran @relation(fields: [idKegiatanAnggaran], references: [idKegiatanAnggaran])
-  nominalDPP           Int               @map("nominal_dpp") @db.Integer
-  kodeObjek            String            @map("kode_objek") @db.VarChar(20)
-  objekPajak           ObjekPajak        @relation(fields: [kodeObjek], references: [kodeObjek])
-  nominalPajak         Int               @map("nominal_pajak") @db.Integer
-  fileBukti            String            @map("file_bukti") @db.VarChar(255)
-  npwpPemotong         String?           @map("npwp_pemotong") @db.VarChar(30)
-  namaPemotong         String?           @map("nama_pemotong") @db.VarChar(100)
+  idInventarisasiPajak String  @id @map("id_inventarisasi_pajak") @db.VarChar(100)
+  uraianKegiatan       String  @map("uraian_kegiatan") @db.VarChar(200)
+  idKegiatanAnggaran   String  @map("id_kegiatan_anggaran") @db.VarChar(20)
+  nominalDPP           Int     @map("nominal_dpp") @db.Integer
+  kodeObjek            String  @map("kode_objek") @db.VarChar(20)
+  nominalPajak         Int     @map("nominal_pajak") @db.Integer
+  fileBukti            String  @map("file_bukti") @db.VarChar(255)
+  npwpPemotong         String? @map("npwp_pemotong") @db.VarChar(30)
+  namaPemotong         String? @map("nama_pemotong") @db.VarChar(100)
+  idl                  String  @db.VarChar(100)
 
   @@map("inventarisasi_pajak")
 }

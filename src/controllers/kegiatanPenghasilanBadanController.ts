@@ -1,4 +1,4 @@
-import { Request, Response, Express } from 'express';
+import { Request, Response, NextFunction, Express } from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
@@ -10,18 +10,19 @@ import * as kegiatanPenghasilanBadanService from '../services/kegiatanPenghasila
 const storageFilePPh23 = multer.diskStorage({
   destination: (req, file, cb) => {
     if (file.fieldname === 'invoice') {
-      const path = 'public/kegiatan_penghasilan_badan/pph23/invoice'
-      fs.mkdirSync(path, { recursive: true })
+      const path = 'public/kegiatan_penghasilan_badan/pph23/invoice';
+      fs.mkdirSync(path, { recursive: true });
 
       cb(null, path);
     } else if (file.fieldname === 'fakturPajak') {
-      const path = 'public/kegiatan_penghasilan_badan/pph23/faktur_pajak'
-      fs.mkdirSync(path, { recursive: true })
+      const path = 'public/kegiatan_penghasilan_badan/pph23/faktur_pajak';
+      fs.mkdirSync(path, { recursive: true });
 
       cb(null, path);
     } else if (file.fieldname === 'dokumenKerjasamaKegiatan') {
-      const path = 'public/kegiatan_penghasilan_badan/pph23/dokumen_kerjasama_kegiatan'
-      fs.mkdirSync(path, { recursive: true })
+      const path =
+        'public/kegiatan_penghasilan_badan/pph23/dokumen_kerjasama_kegiatan';
+      fs.mkdirSync(path, { recursive: true });
 
       cb(null, path);
     }
@@ -40,18 +41,19 @@ const storageFilePPh23 = multer.diskStorage({
 const storageFilePPh4 = multer.diskStorage({
   destination: (req, file, cb) => {
     if (file.fieldname === 'invoice') {
-      const path = 'public/kegiatan_penghasilan_badan/pph4_ayat_2/invoice'
-      fs.mkdirSync(path, { recursive: true })
+      const path = 'public/kegiatan_penghasilan_badan/pph4_ayat_2/invoice';
+      fs.mkdirSync(path, { recursive: true });
 
       cb(null, path);
     } else if (file.fieldname === 'fakturPajak') {
-      const path = 'public/kegiatan_penghasilan_badan/pph4_ayat_2/faktur_pajak'
-      fs.mkdirSync(path, { recursive: true })
+      const path = 'public/kegiatan_penghasilan_badan/pph4_ayat_2/faktur_pajak';
+      fs.mkdirSync(path, { recursive: true });
 
       cb(null, path);
     } else if (file.fieldname === 'dokumenKerjasamaKegiatan') {
-      const path = 'public/kegiatan_penghasilan_badan/pph4_ayat_2/dokumen_kerjasama_kegiatan'
-      fs.mkdirSync(path, { recursive: true })
+      const path =
+        'public/kegiatan_penghasilan_badan/pph4_ayat_2/dokumen_kerjasama_kegiatan';
+      fs.mkdirSync(path, { recursive: true });
 
       cb(null, path);
     }
@@ -129,36 +131,68 @@ const uploadFieldsPPh4 = uploadPPh4.fields([
   { name: 'dokumenKerjasamaKegiatan', maxCount: 1 },
 ]);
 
+const handleFileUploadErrors = (
+  err: any,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  if (err instanceof multer.MulterError) {
+    // Kesalahan Multer terjadi saat mengunggah
+    console.error('Multer Error:', err.message);
+    res.status(500).json({
+      status: {
+        code: 500,
+        description: 'Internal Server Error',
+      },
+      result: 'File upload error: ' + err.message,
+    });
+  } else if (err) {
+    // Kesalahan yang tidak diketahui terjadi
+    console.error('Unknown Error:', err.message);
+    res.status(500).json({
+      status: {
+        code: 500,
+        description: 'Internal Server Error',
+      },
+      result: 'Unknown error occurred during file upload.',
+    });
+  } else {
+    // Tidak ada kesalahan, lanjutkan ke middleware berikutnya
+    next();
+  }
+};
+
 //
 export const createPPh23 = async (req: Request, res: Response) => {
   try {
     uploadFieldsPPh23(req, res, async (err) => {
-      if (err) {
-        return res.status(400).json({ message: err.message });
-      }
+      handleFileUploadErrors(err, req, res, async () => {
+        const files = req.files as {
+          [fieldname: string]: Express.Multer.File[];
+        };
 
-      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+        const invoiceFile = files['invoice']?.[0];
+        const fakturPajakFile = files['fakturPajak']?.[0];
+        const dokumenKerjasamaKegiatanFile =
+          files['dokumenKerjasamaKegiatan']?.[0];
 
-      const invoiceFile = files['invoice']?.[0];
-      const fakturPajakFile = files['fakturPajak']?.[0];
-      const dokumenKerjasamaKegiatanFile =
-        files['dokumenKerjasamaKegiatan']?.[0];
+        const createPPh23 = await kegiatanPenghasilanBadanService.createPPh23({
+          ...req.body,
+          kodeJenisPenghasilan: Number(req.body?.kodeJenisPenghasilan),
+          penghasilanBruto: Number(req.body?.penghasilanBruto),
+          invoice: invoiceFile?.filename,
+          fakturPajak: fakturPajakFile?.filename,
+          dokumenKerjasamaKegiatan: dokumenKerjasamaKegiatanFile?.filename,
+        });
 
-      const createPPh23 = await kegiatanPenghasilanBadanService.createPPh23({
-        ...req.body,
-        kodeJenisPenghasilan: Number(req.body?.kodeJenisPenghasilan),
-        penghasilanBruto: Number(req.body?.penghasilanBruto),
-        invoice: invoiceFile?.filename,
-        fakturPajak: fakturPajakFile?.filename,
-        dokumenKerjasamaKegiatan: dokumenKerjasamaKegiatanFile?.filename,
-      });
-
-      res.json({
-        status: {
-          code: 200,
-          description: 'Ok',
-        },
-        result: createPPh23,
+        res.json({
+          status: {
+            code: 200,
+            description: 'Ok',
+          },
+          result: createPPh23,
+        });
       });
     });
   } catch (error) {
@@ -170,12 +204,12 @@ export const createPPh23 = async (req: Request, res: Response) => {
         },
         result: error.message,
       });
-      return
+      return;
     }
 
-    console.log(error)
+    console.log(error);
 
-    return res.status(500).json({ message: "internal server error" })
+    return res.status(500).json({ message: 'internal server error' });
   }
 };
 
@@ -201,13 +235,13 @@ export const getAllPph23 = async (req: Request, res: Response) => {
         },
         result: error.message,
       });
-      return
+      return;
     }
 
     // send to logger if needed
-    console.log(error)
+    console.log(error);
 
-    return res.status(500).json({ message: "internal server error" })
+    return res.status(500).json({ message: 'internal server error' });
   }
 };
 
@@ -234,12 +268,12 @@ export const getPPh23ById = async (req: Request, res: Response) => {
         },
         result: error.message,
       });
-      return
+      return;
     }
 
-    console.log(error)
+    console.log(error);
 
-    return res.status(500).json({ message: "internal server error" })
+    return res.status(500).json({ message: 'internal server error' });
   }
 };
 
@@ -247,13 +281,13 @@ export const updatePPh23 = async (req: Request, res: Response) => {
   try {
     const { kodeKegiatanBadan } = req.params;
 
+    const updatedData = req.body;
+
     const getPPh23ById = await kegiatanPenghasilanBadanService.getPPh23ById(
       kodeKegiatanBadan
     );
 
     if (getPPh23ById) {
-      const updatedData = req.body;
-
       let invoiceFile = '';
       let fakturPajakFile = '';
       let dokumenKerjasamaKegiatanFile = '';
@@ -350,12 +384,12 @@ export const updatePPh23 = async (req: Request, res: Response) => {
         },
         result: error.message,
       });
-      return
+      return;
     }
 
-    console.log(error)
+    console.log(error);
 
-    return res.status(500).json({ message: "internal server error" })
+    return res.status(500).json({ message: 'internal server error' });
   }
 };
 
@@ -411,12 +445,12 @@ export const deletePPh23 = async (req: Request, res: Response) => {
         },
         result: error.message,
       });
-      return
+      return;
     }
 
-    console.log(error)
+    console.log(error);
 
-    return res.status(500).json({ message: "internal server error" })
+    return res.status(500).json({ message: 'internal server error' });
   }
 };
 
@@ -462,11 +496,11 @@ export const createPPh4Ayat2 = async (req: Request, res: Response) => {
         },
         result: error.message,
       });
-      return
+      return;
     }
-    console.log(error)
+    console.log(error);
 
-    return res.status(500).json({ message: "internal server error" })
+    return res.status(500).json({ message: 'internal server error' });
   }
 };
 
@@ -491,12 +525,12 @@ export const getAllPPh4Ayat2 = async (req: Request, res: Response) => {
         },
         result: error.message,
       });
-      return
+      return;
     }
 
-    console.log(error)
+    console.log(error);
 
-    return res.status(500).json({ message: "internal server error" })
+    return res.status(500).json({ message: 'internal server error' });
   }
 };
 
@@ -522,12 +556,12 @@ export const getPPh4Ayat2ById = async (req: Request, res: Response) => {
         },
         result: error.message,
       });
-      return
+      return;
     }
 
-    console.log(error)
+    console.log(error);
 
-    return res.status(500).json({ message: "internal server error" })
+    return res.status(500).json({ message: 'internal server error' });
   }
 };
 
@@ -582,11 +616,11 @@ export const deletePPh4Ayat2 = async (req: Request, res: Response) => {
         },
         result: error.message,
       });
-      return
+      return;
     }
 
-    console.log(error)
+    console.log(error);
 
-    return res.status(500).json({ message: "internal server error" })
+    return res.status(500).json({ message: 'internal server error' });
   }
 };

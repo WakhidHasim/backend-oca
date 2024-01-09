@@ -8,6 +8,17 @@ type GetObjekPajakParam = {
   tarifNonNpwp?: number;
 };
 
+export const getObjekPajakPPh21List = async (data: GetObjekPajakParam) => {
+  const objekPajakList = data;
+
+  return prisma.objekPajak.findMany({
+    where: {
+      ...objekPajakList,
+      kodeJenisPajakId: 1,
+    },
+  });
+};
+
 export const getObjekPajakPPh23List = async (data: GetObjekPajakParam) => {
   const objekPajakList = data;
 
@@ -15,6 +26,17 @@ export const getObjekPajakPPh23List = async (data: GetObjekPajakParam) => {
     where: {
       ...objekPajakList,
       kodeJenisPajakId: 2,
+    },
+  });
+};
+
+export const getObjekPajakPPh4Ayat2List = async (data: GetObjekPajakParam) => {
+  const objekPajakList = data;
+
+  return prisma.objekPajak.findMany({
+    where: {
+      ...objekPajakList,
+      kodeJenisPajakId: 3,
     },
   });
 };

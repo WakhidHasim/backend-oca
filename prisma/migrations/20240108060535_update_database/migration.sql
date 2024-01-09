@@ -276,6 +276,7 @@ CREATE TABLE "inventarisasi_pajak" (
     "file_bukti" VARCHAR(255) NOT NULL,
     "npwp_pemotong" VARCHAR(30),
     "nama_pemotong" VARCHAR(100),
+    "idl" VARCHAR(100) NOT NULL,
 
     CONSTRAINT "inventarisasi_pajak_pkey" PRIMARY KEY ("id_inventarisasi_pajak")
 );
@@ -344,12 +345,6 @@ CREATE INDEX "agent_nip_idl_idx" ON "agent"("nip", "idl");
 CREATE UNIQUE INDEX "pengelola_nip_key" ON "pengelola"("nip");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "wajib_pajak_orang_pribadi_email_key" ON "wajib_pajak_orang_pribadi"("email");
-
--- CreateIndex
-CREATE UNIQUE INDEX "wajib_pajak_badan_usaha_email_key" ON "wajib_pajak_badan_usaha"("email");
-
--- CreateIndex
 CREATE UNIQUE INDEX "log_kegiatan_penghasilan_op_nip_log_key" ON "log_kegiatan_penghasilan_op"("nip_log");
 
 -- CreateIndex
@@ -375,12 +370,6 @@ ALTER TABLE "pengajuan_anggaran" ADD CONSTRAINT "pengajuan_anggaran_idl_fkey" FO
 
 -- AddForeignKey
 ALTER TABLE "wajib_pajak_orang_pribadi" ADD CONSTRAINT "wajib_pajak_orang_pribadi_negaraKodeNegara_fkey" FOREIGN KEY ("negaraKodeNegara") REFERENCES "negara"("kode_negara") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "inventarisasi_pajak" ADD CONSTRAINT "inventarisasi_pajak_id_kegiatan_anggaran_fkey" FOREIGN KEY ("id_kegiatan_anggaran") REFERENCES "pengajuan_anggaran"("id_kegiatan_anggaran") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "inventarisasi_pajak" ADD CONSTRAINT "inventarisasi_pajak_kode_objek_fkey" FOREIGN KEY ("kode_objek") REFERENCES "objek_pajak"("kode_objek") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "log_kegiatan_penghasilan_op" ADD CONSTRAINT "log_kegiatan_penghasilan_op_id_kegiatan_anggaran_fkey" FOREIGN KEY ("id_kegiatan_anggaran") REFERENCES "pengajuan_anggaran"("id_kegiatan_anggaran") ON DELETE RESTRICT ON UPDATE CASCADE;

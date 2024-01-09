@@ -48,13 +48,13 @@ export const createPPh23 = async (data: CreatePph23Param) => {
       throw new BadRequestError('ID Kegiatan Anggaran tidak ditemukan.');
     }
 
-    // const jenisPenghasilan = await prisma.jenisPenghasilan.findUnique({
-    //   where: { kodeJenisPenghasilan: requestBody.kodeJenisPenghasilan },
-    // });
+    const jenisPenghasilan = await prisma.jenisPenghasilan.findUnique({
+      where: { kodeJenisPenghasilan: requestBody.kodeJenisPenghasilan },
+    });
 
-    // if (!jenisPenghasilan) {
-    //   throw new BadRequestError('Kode Jenis Penghasilan tidak ditemukan.');
-    // }
+    if (!jenisPenghasilan) {
+      throw new BadRequestError('Kode Jenis Penghasilan tidak ditemukan.');
+    }
 
     const wajibPajakBadanUsaha = await prisma.wajibPajakBadanUsaha.findUnique({
       where: { kodeWPBadan: requestBody.kodeWPBadan },
@@ -163,8 +163,12 @@ export const updatePPh23 = async (
   dokumenKerjasamaKegiatanFile: string
 ) => {
   try {
-    if (!kodeKegiatanBadan) {
-      throw new Error('Kode Kegiatan Badan tidak ditemukan');
+    const getPPh23ById = await prisma.kegiatanPenghasilanBadan.findUnique({
+      where: { kodeKegiatanBadan },
+    });
+
+    if (!getPPh23ById) {
+      throw new BadRequestError('Kode Kegiatan Badan tidak ditemukan.');
     }
 
     const PengajuanAnggaran = await prisma.PengajuanAnggaran.findUnique({

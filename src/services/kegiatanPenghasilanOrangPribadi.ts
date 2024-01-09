@@ -32,13 +32,13 @@ export const createKegiatanPenghasilanOrangPribadi = async (
       throw new BadRequestError('Id Kegiatan Anggaran tidak ditemukan.');
     }
 
-    // const satuanKerja = await prisma.satuanKerja.findUnique({
-    //   where: { idl: requestBody.idl },
-    // });
+    const satuanKerja = await prisma.satuanKerja.findUnique({
+      where: { idl: requestBody.idl },
+    });
 
-    // if (!satuanKerja) {
-    //   throw new BadRequestError('IDL tidak ditemukan.');
-    // }
+    if (!satuanKerja) {
+      throw new BadRequestError('IDL tidak ditemukan.');
+    }
 
     const jenisPenghasilan = await prisma.jenisPenghasilan.findUnique({
       where: { kodeJenisPenghasilan: requestBody.kodeJenisPenghasilan },
@@ -88,7 +88,7 @@ export const updateKegiatanPenghasilanOP = async (
 ) => {
   try {
     if (!kodeKegiatanOP) {
-      throw new Error('Kode Kegiatan OP tidak ditemukan');
+      throw new BadRequestError('Kode Kegiatan OP tidak ditemukan');
     }
 
     const updatedKegiatanOP = await prisma.kegiatanPenghasilanOP.update({

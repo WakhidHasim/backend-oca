@@ -34,8 +34,8 @@ app.use(
 app.use('/api/agent/login', agentRoutes);
 app.use('/api/bank', bankRoutes);
 app.use('/api/negara', negaraRoutes);
-app.use('/api/jenis-penghasilan-pph23', jenisPenghasilanRoutes);
-app.use('/api/objek-pajak-pph23', objekPajakRoutes);
+app.use('/api/jenis-penghasilan', jenisPenghasilanRoutes);
+app.use('/api/objek-pajak', objekPajakRoutes);
 app.use('/api/pengajuan-anggaran', pengajuanAnggaranRoutes);
 app.use('/api/kegiatan-penghasilan-badan', kegiatanPenghasilanBadanRoutes);
 app.use('/api/kegiatan-penghasilan-orang-pribadi', kegiatanPenghasilanOPRoutes);
