@@ -281,91 +281,55 @@ export const updatePPh23 = async (req: Request, res: Response) => {
   try {
     const { kodeKegiatanBadan } = req.params;
 
-    const updatedData = req.body;
-
     const getPPh23ById = await kegiatanPenghasilanBadanService.getPPh23ById(
       kodeKegiatanBadan
     );
+    if (!getPPh23ById || !getPPh23ById.invoice) {
+      return res.status(404).json({
+        status: {
+          code: 404,
+          description: 'Not Found',
+        },
+        result: "Pph23 not found"
+      })
+    }
 
-    if (getPPh23ById) {
-      let invoiceFile = '';
-      let fakturPajakFile = '';
-      let dokumenKerjasamaKegiatanFile = '';
+    uploadFieldsPPh23(req, res, async (err: any) => {
+      if (err) {
+        throw new Error('File upload error: ' + err.message);
+      }
 
-      const handleFileUpload = async (fieldName: string, filePath: string) => {
-        if (filePath) {
-          await uploadFieldsPPh23(req, res, (err: any) => {
-            if (err) {
-              throw new Error('File upload error: ' + err.message);
-            }
+      const body = req.body
 
-            const files = req.files as {
-              [fieldname: string]: Express.Multer.File[];
-            };
-            if (fieldName === 'invoice') {
-              invoiceFile = files['invoice']?.[0]?.filename;
-            } else if (fieldName === 'fakturPajak') {
-              fakturPajakFile = files['fakturPajak']?.[0]?.filename;
-            } else if (fieldName === 'dokumenKerjasamaKegiatan') {
-              dokumenKerjasamaKegiatanFile =
-                files['dokumenKerjasamaKegiatan']?.[0]?.filename;
-            }
-          });
-        }
+      const files = req.files as {
+        [fieldname: string]: Express.Multer.File[];
       };
 
-      if (updatedData.invoice) {
-        if (getPPh23ById && getPPh23ById.invoice) {
-          const filePath = path.join(
-            'public/kegiatan_penghasilan_badan/pph23/invoice',
-            getPPh23ById.invoice
-          );
-          fs.unlinkSync(filePath);
-        }
-        await handleFileUpload('invoice', updatedData.invoice);
-      } else {
-        invoiceFile = getPPh23ById.invoice;
+      let invoiceFileName = getPPh23ById.invoice;
+      let fakturPajakFileName = getPPh23ById.fakturPajak;
+      let dokumenKerjasamaKegiatanFileName = getPPh23ById.dokumenKerjasamaKegiatan;
+
+      if (files['invoice']?.[0]?.filename) {
+        invoiceFileName = files['invoice'][0].filename;
       }
 
-      if (updatedData.fakturPajak) {
-        if (getPPh23ById && getPPh23ById.fakturPajak) {
-          const filePath = path.join(
-            'public/kegiatan_penghasilan_badan/pph23/faktur_pajak',
-            getPPh23ById.fakturPajak
-          );
-          fs.unlinkSync(filePath);
-        }
-        await handleFileUpload('fakturPajak', updatedData.fakturPajak);
-      } else {
-        fakturPajakFile = getPPh23ById.fakturPajak;
+      if (files['fakturPajak']?.[0]?.filename) {
+        fakturPajakFileName = files['fakturPajak']?.[0]?.filename;
       }
 
-      if (updatedData.dokumenKerjasamaKegiatan) {
-        if (getPPh23ById && getPPh23ById.dokumenKerjasamaKegiatan) {
-          const filePath = path.join(
-            'public/kegiatan_penghasilan_badan/pph23/dokumen_kerjasama_kegiatan',
-            getPPh23ById.dokumenKerjasamaKegiatan
-          );
-          fs.unlinkSync(filePath);
-        }
-        await handleFileUpload(
-          'dokumenKerjasamaKegiatan',
-          updatedData.dokumenKerjasamaKegiatan
-        );
-      } else {
-        dokumenKerjasamaKegiatanFile = getPPh23ById.dokumenKerjasamaKegiatan;
+      if (files['dokumenKerjasamaKegiatan']?.[0]?.filename) {
+        dokumenKerjasamaKegiatanFileName = files['dokumenKerjasamaKegiatan']?.[0]?.filename;
       }
 
-      const updatedKegiatanOP =
-        await kegiatanPenghasilanBadanService.updatePPh23(
-          kodeKegiatanBadan,
-          updatedData,
-          parseInt(updatedData?.kodeJenisPenghasilan),
-          parseInt(updatedData?.penghasilanBruto),
-          invoiceFile,
-          fakturPajakFile,
-          dokumenKerjasamaKegiatanFile
-        );
+      const updatedKegiatanOP = await kegiatanPenghasilanBadanService.updatePPh23(
+        kodeKegiatanBadan,
+        body,
+        parseInt(body?.kodeJenisPenghasilan),
+        parseInt(body?.penghasilanBruto),
+        invoiceFileName,
+        fakturPajakFileName,
+        dokumenKerjasamaKegiatanFileName
+      );
 
       res.json({
         status: {
@@ -374,7 +338,7 @@ export const updatePPh23 = async (req: Request, res: Response) => {
         },
         result: updatedKegiatanOP,
       });
-    }
+    });
   } catch (error) {
     if (error instanceof BadRequestError) {
       res.status(400).json({
