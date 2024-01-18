@@ -2,7 +2,6 @@ import { prisma } from '../config/database';
 import BadRequestError from '../error/BadRequestError';
 
 import { KegiatanPenghasilanOrangPribadi } from '../entities/kegiatanPenghasilanOrangPribadi';
-import { createKegiatanOrangPribaiSchema } from '../validation/kegiatanPenghasikanOrangPribadiSchema';
 
 type createKegiatanOrangPribadi = KegiatanPenghasilanOrangPribadi;
 type updateKegiatanOrangPribadi = KegiatanPenghasilanOrangPribadi;
@@ -19,10 +18,10 @@ type getListOpParam = {
 };
 
 export const createKegiatanPenghasilanOrangPribadi = async (
-  data: createKegiatanOrangPribadi
+  input: createKegiatanOrangPribadi
 ) => {
   try {
-    const requestBody = createKegiatanOrangPribaiSchema.parse(data);
+    const requestBody = input;
 
     const pengajuanAnggaran = await prisma.pengajuanAnggaran.findUnique({
       where: { idKegiatanAnggaran: requestBody.idKegiatanAnggaran },
@@ -50,18 +49,14 @@ export const createKegiatanPenghasilanOrangPribadi = async (
 
     const createKegiatanOrangPribadi =
       await prisma.kegiatanPenghasilanOP.create({
-        data: {
-          ...requestBody,
-          tanggalInput: new Date(),
-          kodeJenisPajak: 1,
-          idl: '211.01',
-        },
+        data: requestBody,
       });
 
     return {
       kodeKegiatanOP: createKegiatanOrangPribadi.kodeKegiatanOP,
       tanggalInput: createKegiatanOrangPribadi.tanggalInput,
       uraianKegiatan: createKegiatanOrangPribadi.uraianKegiatan,
+      idKegiatanAnggaran: createKegiatanOrangPribadi.idKegiatanAnggaran,
       kodeJenisPenghasilan: createKegiatanOrangPribadi.kodeJenisPenghasilan,
       picPencairanPenghasilan:
         createKegiatanOrangPribadi.picPencairanPenghasilan,

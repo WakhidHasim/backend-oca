@@ -1,87 +1,178 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction, Express } from 'express';
 import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+
+import BadRequestError from '../error/BadRequestError';
 
 import * as wajibPajakOrangPribadiService from '../services/wajibPajakOrangPribadiService';
-import { uploadWpopDocument } from '../services/upload/uploadService';
-import HttpError from '../error/HttpError';
 
-export const createWajibPajakOrangPribadi = async (
-  req: Request,
-  res: Response
-) => {
-  try {
-    const wajibPajakOrangPribadi =
-      await wajibPajakOrangPribadiService.createWajibPajakOrangPribadi(
-        req.body
-      );
-    res.json({
-      status: {
-        code: 200,
-        description: 'Data Wajib Pajak Orang Pribadi berhasil ditambahkan !',
-      },
-      result: wajibPajakOrangPribadi,
-    });
-  } catch (error) {
-    console.log(Object.getPrototypeOf(error));
-    if (error instanceof HttpError) {
-      return res.status(error.statusCode).json({
-        status: {
-          code: error.statusCode,
-          description: error.message,
-        },
-        result: null,
-      });
+const storageFile = multer.diskStorage({
+  destination: (req, file, cb) => {
+    if (file.fieldname === 'fileFotoNpwp') {
+      const path = 'public/wpop/npwp';
+      fs.mkdirSync(path, { recursive: true });
+
+      cb(null, path);
+    } else if (file.fieldname === 'fileFotoIdOrangPribadi') {
+      const path = 'public/wpop/id';
+      fs.mkdirSync(path, { recursive: true });
+
+      cb(null, path);
+    } else if (file.fieldname === 'fileFotoBuktiRekening') {
+      const path = 'public/wpop/rekening';
+      fs.mkdirSync(path, { recursive: true });
+
+      cb(null, path);
     }
+  },
+  filename: (req, file, cb) => {
+    if (file.fieldname === 'fileFotoNpwp') {
+      cb(null, file.fieldname + Date.now() + path.extname(file.originalname));
+    } else if (file.fieldname === 'fileFotoIdOrangPribadi') {
+      cb(null, file.fieldname + Date.now() + path.extname(file.originalname));
+    } else if (file.fieldname === 'fileFotoBuktiRekening') {
+      cb(null, file.fieldname + Date.now() + path.extname(file.originalname));
+    }
+  },
+});
 
-    const e = error as Error;
-    console.log(e);
+function checkFileType(
+  req: Request,
+  file: Express.Multer.File,
+  cb: (error: Error | null, isPdf: boolean) => void
+) {
+  if (
+    file.fieldname === 'fileFotoNpwp' ||
+    file.fieldname === 'fileFotoIdOrangPribadi' ||
+    file.fieldname === 'fileFotoBuktiRekening'
+  ) {
+    if (
+      file.mimetype === 'image/png' ||
+      file.mimetype === 'image/jpeg' ||
+      file.mimetype === 'image/jpg'
+    ) {
+      cb(null, true);
+    } else {
+      cb(null, false);
+    }
+  } else {
+    cb(null, false);
+  }
+}
+
+const upload = multer({
+  storage: storageFile,
+  limits: {
+    fileSize: 1024 * 1024 * 10,
+  },
+  fileFilter: (req, file, cb) => {
+    checkFileType(req, file, (error, isPdf) => {
+      if (error) {
+        return cb(error);
+      }
+      cb(null, isPdf);
+    });
+  },
+});
+
+const uploadFieldsWPOP = upload.fields([
+  { name: 'fileFotoNpwp', maxCount: 1 },
+  { name: 'fileFotoIdOrangPribadi', maxCount: 1 },
+  { name: 'fileFotoBuktiRekening', maxCount: 1 },
+]);
+
+const handleFileUploadErrors = (
+  err: any,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  if (err instanceof multer.MulterError) {
+    console.error('Multer Error:', err.message);
     res.status(500).json({
       status: {
         code: 500,
-        description: e.message,
+        description: 'Internal Server Error',
       },
-      result: null,
+      result: 'File upload error: ' + err.message,
     });
+  } else if (err) {
+    console.error('Unknown Error:', err.message);
+    res.status(500).json({
+      status: {
+        code: 500,
+        description: 'Internal Server Error',
+      },
+      result: 'Unknown error occurred during file upload.',
+    });
+  } else {
+    next();
   }
 };
 
-const multerUploadSomeDocument = multer();
-/**
- * Handle operasi untuk upload dokumen tertentu
- *
- * NOTE: saat ini saya bikin contoh 'some_document'
- *
- * @param req Request
- * @param res Response
- * @returns void
- */
-export const uploadSomeDocument = async (req: Request, res: Response) => {
+export const createWPOP = async (req: Request, res: Response) => {
   try {
-    const controller = async () => {
-      if (!req.file) return res.status(400).json({ message: 'file required' });
+    uploadFieldsWPOP(req, res, async (err) => {
+      handleFileUploadErrors(err, req, res, async () => {
+        const files = req.files as {
+          [fieldname: string]: Express.Multer.File[];
+        };
 
-      const file = req.file;
+        const fileFotoNpwp = files['fileFotoNpwp']?.[0];
+        const fileFotoIdOrangPribadi = files['fileFotoIdOrangPribadi']?.[0];
+        const fileFotoBuktiRekening = files['fileFotoBuktiRekening']?.[0];
 
-      const path = 'registrasi_wajib_pajak';
+        const createWPOP = await wajibPajakOrangPribadiService.createWPOP({
+          ...req.body,
+          fileFotoNpwp: fileFotoNpwp?.filename,
+          fileFotoIdOrangPribadi: fileFotoIdOrangPribadi?.filename,
+          fileFotoBuktiRekening: fileFotoBuktiRekening?.filename,
+        });
 
-      await uploadWpopDocument(
-        {
-          file: {
-            name: file.originalname,
-            content: file.buffer,
+        res.json({
+          status: {
+            code: 200,
+            description: 'Ok',
           },
-        },
-        path
-      );
-
-      return res.status(200).json({ message: 'success' });
-    };
-
-    const multerHandler = multerUploadSomeDocument.single('document');
-    multerHandler(req, res, controller);
+          result: createWPOP,
+        });
+      });
+    });
   } catch (error) {
+    if (error instanceof BadRequestError) {
+      res.status(400).json({
+        status: {
+          code: 400,
+          description: 'Bad Request',
+        },
+        result: error.message,
+      });
+      return;
+    }
+
     console.log(error);
-    return res.status(500).json({
+
+    return res.status(500).json({ message: 'internal server error' });
+  }
+};
+
+export const wpopList = async (req: Request, res: Response) => {
+  try {
+    const queryParameters = req.query;
+    const wpop = await wajibPajakOrangPribadiService.getWPOPList(
+      queryParameters
+    );
+    res.json({
+      status: {
+        code: 200,
+        description: 'OK',
+      },
+      result: wpop,
+    });
+  } catch (error: any) {
+    console.log(error.message);
+    res.status(500).json({
       status: {
         code: 500,
         description: 'Internal Server Error',

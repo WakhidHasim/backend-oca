@@ -73,7 +73,7 @@ CREATE TABLE "tarif_progresif_pegawai_tetap" (
 CREATE TABLE "objek_pajak" (
     "kode_objek" VARCHAR(20) NOT NULL,
     "kode_jenis_pajak_id" INTEGER NOT NULL,
-    "objek_pajak" VARCHAR(255) NOT NULL,
+    "objek_pajak" TEXT NOT NULL,
     "tarif_npwp" DOUBLE PRECISION NOT NULL,
     "tarif_non_npwp" DOUBLE PRECISION NOT NULL,
 
@@ -130,7 +130,7 @@ CREATE TABLE "pengajuan_anggaran" (
 
 -- CreateTable
 CREATE TABLE "wajib_pajak_orang_pribadi" (
-    "kode_wpop" BIGSERIAL NOT NULL,
+    "kode_wpop" TEXT NOT NULL,
     "nama" VARCHAR(100) NOT NULL,
     "email" VARCHAR(200) NOT NULL,
     "password" VARCHAR(255),
@@ -138,7 +138,7 @@ CREATE TABLE "wajib_pajak_orang_pribadi" (
     "nama_negara" VARCHAR(100) NOT NULL,
     "id_orang_pribadi" VARCHAR(30) NOT NULL,
     "nama_identitas" VARCHAR(100) NOT NULL,
-    "masa_berlaku_passport" TIMESTAMP(3) NOT NULL,
+    "masa_berlaku_passport" TIMESTAMP(3),
     "npwp" VARCHAR(30),
     "nama_npwp" VARCHAR(100),
     "kota_npwp" VARCHAR(50),
@@ -150,15 +150,14 @@ CREATE TABLE "wajib_pajak_orang_pribadi" (
     "file_foto_npwp" VARCHAR(255),
     "file_foto_id_orang_pribadi" VARCHAR(255) NOT NULL,
     "file_foto_bukti_rekening" VARCHAR(255),
-    "is_approved" BOOLEAN NOT NULL DEFAULT false,
-    "negaraKodeNegara" VARCHAR(5),
+    "is_approved" BOOLEAN NOT NULL,
 
     CONSTRAINT "wajib_pajak_orang_pribadi_pkey" PRIMARY KEY ("kode_wpop")
 );
 
 -- CreateTable
 CREATE TABLE "wajib_pajak_badan_usaha" (
-    "kode_wpbadan" VARCHAR(50) NOT NULL,
+    "kode_wpbadan" TEXT NOT NULL,
     "nama_badan" VARCHAR(100) NOT NULL,
     "email" VARCHAR(200) NOT NULL,
     "npwp" VARCHAR(30),
@@ -169,7 +168,7 @@ CREATE TABLE "wajib_pajak_badan_usaha" (
     "nama_rekening" VARCHAR(100),
     "nama_narahubung" VARCHAR(100) NOT NULL,
     "kontak_narahubung" VARCHAR(15) NOT NULL,
-    "ada_skb_pph23" BOOLEAN NOT NULL,
+    "ada_skb_pph23" VARCHAR(3) NOT NULL,
     "masa_berlaku_bebas_pph23" DATE,
     "file_foto_identitas_badan" VARCHAR(255) NOT NULL,
     "file_foto_bukti_rekening" VARCHAR(255) NOT NULL,
@@ -267,7 +266,7 @@ CREATE TABLE "kegiatan_penghasilan_badan" (
 
 -- CreateTable
 CREATE TABLE "inventarisasi_pajak" (
-    "id_inventarisasi_pajak" VARCHAR(100) NOT NULL,
+    "id_inventarisasi_pajak" TEXT NOT NULL,
     "uraian_kegiatan" VARCHAR(200) NOT NULL,
     "id_kegiatan_anggaran" VARCHAR(20) NOT NULL,
     "nominal_dpp" INTEGER NOT NULL,
@@ -312,7 +311,6 @@ CREATE TABLE "log_item_kegiatan_penghasilan_op" (
     "file_bukti_potong" VARCHAR(255) NOT NULL,
     "status" VARCHAR(50) NOT NULL,
     "nip_log" VARCHAR(50) NOT NULL,
-    "wajibPajakOrangPribadiKodeWPOP" BIGINT,
 
     CONSTRAINT "log_item_kegiatan_penghasilan_op_pkey" PRIMARY KEY ("kode_kegiatan_op","kode_wpop")
 );
@@ -369,9 +367,6 @@ ALTER TABLE "pengelola" ADD CONSTRAINT "pengelola_nip_fkey" FOREIGN KEY ("nip") 
 ALTER TABLE "pengajuan_anggaran" ADD CONSTRAINT "pengajuan_anggaran_idl_fkey" FOREIGN KEY ("idl") REFERENCES "satuan_kerja"("idl") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "wajib_pajak_orang_pribadi" ADD CONSTRAINT "wajib_pajak_orang_pribadi_negaraKodeNegara_fkey" FOREIGN KEY ("negaraKodeNegara") REFERENCES "negara"("kode_negara") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "log_kegiatan_penghasilan_op" ADD CONSTRAINT "log_kegiatan_penghasilan_op_id_kegiatan_anggaran_fkey" FOREIGN KEY ("id_kegiatan_anggaran") REFERENCES "pengajuan_anggaran"("id_kegiatan_anggaran") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -385,6 +380,3 @@ ALTER TABLE "log_item_kegiatan_penghasilan_op" ADD CONSTRAINT "log_item_kegiatan
 
 -- AddForeignKey
 ALTER TABLE "log_item_kegiatan_penghasilan_op" ADD CONSTRAINT "log_item_kegiatan_penghasilan_op_nip_log_fkey" FOREIGN KEY ("nip_log") REFERENCES "pegawai"("nip") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "log_item_kegiatan_penghasilan_op" ADD CONSTRAINT "log_item_kegiatan_penghasilan_op_wajibPajakOrangPribadiKod_fkey" FOREIGN KEY ("wajibPajakOrangPribadiKodeWPOP") REFERENCES "wajib_pajak_orang_pribadi"("kode_wpop") ON DELETE SET NULL ON UPDATE CASCADE;

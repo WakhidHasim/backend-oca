@@ -1,49 +1,136 @@
 import { prisma } from '../config/database';
+import BadRequestError from '../error/BadRequestError';
 
-type GetWajibPajakBadanUSahaParam = {
-  kode_wpbadan?: string;
-  nama_badan?: string;
+import { WajibPajakBadanUsaha } from '../entities/wajibPajakBadanUsaha';
+import { createWajibPajakBadanUsahaSchema } from '../validation/wajibPajakBadanUsahaSchema';
+
+type CreateWPBUParam = WajibPajakBadanUsaha;
+type UpdateWPBUParam = WajibPajakBadanUsaha;
+
+type GetWajibPajakBadanUsahaParam = {
+  kodeWPBadan?: string;
+  namaBadan?: string;
   email?: string;
   npwp?: string;
-  nama_npwp?: string;
-  kota_npwp?: string;
-  bank_transfer?: string;
-  no_rekening?: string;
-  nama_rekening?: string;
-  nama_narahubung?: string;
-  kontak_narahubung?: string;
-  ada_skb_pph23?: boolean;
-  masa_berlaku_bebas_pph23?: Date;
-  file_foto_identitas_badan?: string;
-  file_foto_bukti_rekening?: string;
-  file_foto_npwp?: string;
-  file_surat_bebas_pph23?: string;
-  status_pkp?: string;
+  namaNpwp?: string;
+  kotaNpwp?: string;
+  bankTransfer?: string;
+  noRekening?: string;
+  namaRekening?: string;
+  namaNaraHubung?: string;
+  kontakNaraHubung?: string;
+  adaSkbPPh23?: boolean;
+  masaBerlakuBebasPPh23?: Date;
+  fileFotoIdentitasBadan?: string;
+  fileFotoBuktiRekening?: string;
+  fileFotoNpwp?: string;
+  fileSuratBebasPPh23?: string;
+  statusPkp?: string;
 };
 
-export const getWPBUList = async (data: GetWajibPajakBadanUSahaParam) => {
-  const wpbuList = {
-    kodeWPBadan: data?.kode_wpbadan,
-    namaBadan: data?.nama_badan,
-    email: data?.email,
-    npwp: data?.npwp,
-    namaNpwp: data?.nama_npwp,
-    kotaNpwp: data?.kota_npwp,
-    bankTransfer: data?.bank_transfer,
-    noRekening: data?.no_rekening,
-    namaRekening: data?.nama_rekening,
-    namaNaraHubung: data?.nama_narahubung,
-    kontakNaraHubung: data?.kontak_narahubung,
-    adaSkbPPh23: data?.ada_skb_pph23,
-    masaBerlakuBebasPPh23: data?.masa_berlaku_bebas_pph23,
-    fileFotoIdentitasBadan: data?.file_foto_identitas_badan,
-    fileFotoBuktiRekening: data?.file_foto_bukti_rekening,
-    fileFotoNpwp: data?.file_foto_npwp,
-    fileSuratBebasPPh23: data?.file_surat_bebas_pph23,
-    statusPkp: data?.status_pkp,
-  };
+export const createWPBU = async (data: CreateWPBUParam) => {
+  try {
+    const requestBody = createWajibPajakBadanUsahaSchema.parse(data);
+
+    const craeteWPBU = await prisma.wajibPajakBadanUsaha.create({
+      data: {
+        ...requestBody,
+      },
+    });
+
+    return craeteWPBU;
+  } catch (error) {
+    console.error('Error creating Wajib Pajak Badan Usaha:', error);
+    throw error;
+  }
+};
+
+export const getAllWPBU = async (data: GetWajibPajakBadanUsahaParam) => {
+  const wpbuList = data;
 
   return prisma.wajibPajakBadanUsaha.findMany({
-    where: wpbuList,
+    where: {
+      ...wpbuList,
+    },
   });
+};
+
+export const getWPBUById = async (kodeWPBadan: string) => {
+  try {
+    const wpbu = await prisma.wajibPajakBadanUsaha.findUnique({
+      where: { kodeWPBadan },
+    });
+
+    if (!wpbu) {
+      throw new BadRequestError('Kegiatan Penghasilan Badan tidak ditemukan');
+    }
+
+    return wpbu;
+  } catch (error) {
+    console.error(
+      'Error getting Kegiatan Penghasilan Badan Usaha by ID:',
+      error
+    );
+    throw error;
+  }
+};
+
+export const updateWPBU = async (
+  kodeWPBadan: string,
+  updatedData: Partial<UpdateWPBUParam>,
+  fileFotoIdentitasBadan: string,
+  fileFotoBuktiRekening: string,
+  fileFotoNpwp: string,
+  fileSuratBebasPPh23: string
+) => {
+  try {
+    const wpbu = await prisma.wajibPajakBadanUsaha.findFirst({
+      where: { kodeWPBadan },
+    });
+
+    if (!wpbu) {
+      throw new BadRequestError('Kode Badan Usaha tidak ditemukan.');
+    }
+
+    const updatedKegiatanBadanUsaha = await prisma.wajibPajakBadanUsaha.update({
+      where: { kodeWPBadan },
+      data: {
+        namaBadan: updatedData.namaBadan,
+        email: updatedData.email,
+        npwp: updatedData.npwp,
+        namaNpwp: updatedData.namaNpwp,
+        kotaNpwp: updatedData.kotaNpwp,
+        bankTransfer: updatedData.bankTransfer,
+        noRekening: updatedData.noRekening,
+        namaRekening: updatedData.namaRekening,
+        namaNaraHubung: updatedData.namaNaraHubung,
+        kontakNaraHubung: updatedData.kontakNaraHubung,
+        adaSkbPPh23: updatedData.adaSkbPPh23,
+        masaBerlakuBebasPPh23: updatedData.masaBerlakuBebasPPh23,
+        fileFotoIdentitasBadan: fileFotoIdentitasBadan,
+        fileFotoBuktiRekening: fileFotoBuktiRekening,
+        fileFotoNpwp: fileFotoNpwp,
+        fileSuratBebasPPh23: fileSuratBebasPPh23,
+        statusPkp: updatedData.statusPkp,
+      },
+    });
+
+    return updatedKegiatanBadanUsaha;
+  } catch (error) {
+    console.error('Error updating Kegiatan Penghasilan Badan Usaha:', error);
+    throw error;
+  }
+};
+
+export const deleteWPBU = async (kodeWPBadan: string) => {
+  try {
+    const deletedWPBU = await prisma.wajibPajakBadanUsaha.delete({
+      where: { kodeWPBadan },
+    });
+
+    return deletedWPBU;
+  } catch (error) {
+    console.error('Error deleting Kegiatan Penghasilan Badan Usaha:', error);
+    throw error;
+  }
 };

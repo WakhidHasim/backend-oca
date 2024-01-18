@@ -40,3 +40,13 @@ export const getObjekPajakPPh4Ayat2List = async (data: GetObjekPajakParam) => {
     },
   });
 };
+
+export const getObjekPajakList = async (data: GetObjekPajakParam) => {
+  const objekPajakList = data;
+
+  return prisma.objekPajak.findMany({
+    where: {
+      ...objekPajakList,
+    },
+  });
+};

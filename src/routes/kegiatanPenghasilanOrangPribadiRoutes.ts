@@ -1,29 +1,23 @@
 import express from 'express';
 
-import * as kegiatanPenghasilanOPController from '../controllers/kegiatanPenghasilanOrangPribadiController';
+import {
+  createKegiatanPenghasilanOP,
+  getKegiatanPenghasilanOrangPribadiList,
+  getKegiatanPenghasilanOPById,
+  updateKegiatanPenghasilanOP,
+  deleteKegiatanPenghasilanOP,
+} from '../controllers/kegiatanPenghasilanOrangPribadiController';
 
 const router = express.Router();
 
-router.post('/', kegiatanPenghasilanOPController.createKegiatanPenghasilanOP);
+router.post('/', createKegiatanPenghasilanOP);
 
-router.get(
-  '/',
-  kegiatanPenghasilanOPController.getKegiatanPenghasilanOrangPribadiList
-);
+router.get('/', getKegiatanPenghasilanOrangPribadiList);
 
-router.get(
-  '/:kodeKegiatanOP',
-  kegiatanPenghasilanOPController.getKegiatanPenghasilanOPById
-);
+router.get('/:kodeKegiatanOP', getKegiatanPenghasilanOPById);
 
-router.put(
-  '/:kodeKegiatanOP',
-  kegiatanPenghasilanOPController.updateKegiatanPenghasilanOP
-);
+router.put('/:kodeKegiatanOP', updateKegiatanPenghasilanOP);
 
-router.delete(
-  '/:kodeKegiatanOP',
-  kegiatanPenghasilanOPController.deleteKegiatanPenghasilanOP
-);
+router.delete('/:kodeKegiatanOP', deleteKegiatanPenghasilanOP);
 
 export default router;

@@ -1,11 +1,3 @@
-export enum Status {
-  entry = 'Entry',
-  verifikasi = 'Verifikasi',
-  setor = 'Di Setor',
-  terlapor = 'Terlapor DJP',
-  selesai = 'Selesai',
-}
-
 export type KegiatanPenghasilanBadan = {
   kodeKegiatanBadan: string;
   tanggalInput: Date;
@@ -17,17 +9,9 @@ export type KegiatanPenghasilanBadan = {
   kodeWPBadan: string;
   penghasilanBruto: number;
   kodeObjek: string;
-  tarifPajak: number;
-  potonganPajak: number;
-  penghasilanDiterima: number;
-  noRekening: string;
-  namaRekening: string;
-  bankTransfer: string;
-  narahubung: string;
-  invoice: string;
-  fakturPajak: string;
-  dokumenKerjasamaKegiatan: string;
-  status: Status;
+  invoice: string | Buffer;
+  fakturPajak?: string | Buffer;
+  dokumenKerjasamaKegiatan: string | Buffer;
+  status: string;
   idl: string;
-  npwp: string;
 };

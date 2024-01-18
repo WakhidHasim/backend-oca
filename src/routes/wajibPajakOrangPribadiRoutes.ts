@@ -4,6 +4,8 @@ import * as wajibPajakOrangPribadiController from '../controllers/wajibPajakOran
 
 const router = express.Router();
 
-router.post('/', wajibPajakOrangPribadiController.createWajibPajakOrangPribadi);
+router.post('/', wajibPajakOrangPribadiController.createWPOP);
+
+router.get('/', wajibPajakOrangPribadiController.wpopList);
 
 export default router;

@@ -76,3 +76,28 @@ export const objekPajakPPh4Ayat2List = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const objekPajakList = async (req: Request, res: Response) => {
+  try {
+    const queryParameters = req.query;
+    const objekPajakList = await objekPajakService.getObjekPajakList(
+      queryParameters
+    );
+    res.json({
+      status: {
+        code: 200,
+        description: 'OK',
+      },
+      result: objekPajakList,
+    });
+  } catch (error: any) {
+    console.log(error.message);
+    res.status(500).json({
+      status: {
+        code: 500,
+        description: 'Internal Server Error',
+      },
+      result: null,
+    });
+  }
+};
