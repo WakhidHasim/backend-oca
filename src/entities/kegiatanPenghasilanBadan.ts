@@ -1,6 +1,6 @@
 export type KegiatanPenghasilanBadan = {
   kodeKegiatanBadan: string;
-  tanggalInput: Date;
+  tanggalInput: string;
   uraianKegiatan: string;
   idKegiatanAnggaran: string;
   kodeJenisPenghasilan: number;

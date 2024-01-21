@@ -31,7 +31,7 @@ app.use(validationErrorHandler);
 
 app.use(
   cors({
-    origin: 'https://taon.qlm.one/',
+    origin: '*',
   })
 );
 

@@ -257,7 +257,7 @@ model ItemKegiatanPenghasilanOP {
 
 model KegiatanPenghasilanBadan {
   kodeKegiatanBadan        String    @id @map("kode_kegiatan_badan") @db.VarChar(50)
-  tanggalInput             DateTime  @map("tanggal_input")
+  tanggalInput             DateTime  @map("tanggal_input") @db.Timestamptz()
   uraianKegiatan           String    @map("uraian_kegiatan") @db.VarChar(200)
   idKegiatanAnggaran       String    @map("id_kegiatan_anggaran") @db.VarChar(20)
   kodeJenisPenghasilan     Int       @map("kode_jenis_penghasilan") @db.Integer
@@ -283,6 +283,7 @@ model KegiatanPenghasilanBadan {
   kodePeriodeOtorisasi     String?   @map("kode_periode_otorisasi") @db.VarChar(20)
   status                   String    @db.VarChar(100)
   idl                      String    @db.VarChar(100)
+  increment                BigInt?   @default(autoincrement()) @db.BigInt
 
   @@map("kegiatan_penghasilan_badan")
 }
