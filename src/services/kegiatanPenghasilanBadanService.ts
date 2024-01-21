@@ -1,5 +1,4 @@
 import { prisma } from '../config/database';
-import { Prisma } from '@prisma/client';
 import BadRequestError from '../error/BadRequestError';
 
 import { KegiatanPenghasilanBadan } from '../entities/kegiatanPenghasilanBadan';
@@ -133,11 +132,15 @@ export const createPPh23 = async (input: CreatePph23Param) => {
   return craetePPh23;
 };
 
-export const getAllPPh23 = async (data: GetPph23List) => {
+export const getAllPPh23 = async (
+  data: GetPph23List,
+  page: number,
+  limit: number
+) => {
   const kegiatanPenghasilanBadanUsahaList = data;
 
-  const currentYear = new Date().getFullYear();
-  const tanggalInput = data.tanggalInput;
+  const take = limit;
+  const skip = (page - 1) * limit;
 
   return prisma.kegiatanPenghasilanBadan.findMany({
     where: {
@@ -145,6 +148,8 @@ export const getAllPPh23 = async (data: GetPph23List) => {
       kodeJenisPajak: 2,
       idl: data.idl,
     },
+    skip: skip,
+    take: take,
   });
 };
 

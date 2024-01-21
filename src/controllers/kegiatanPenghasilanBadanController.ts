@@ -276,9 +276,13 @@ export const createPPh23 = async (
 export const getAllPph23 = async (req: Request, res: Response) => {
   try {
     const queryParameters = req.query;
+    const page = parseInt(queryParameters.page as string) || 1;
+    const limit = 1;
 
     const getAllPPh23 = await kegiatanPenghasilanBadanService.getAllPPh23(
-      queryParameters
+      queryParameters,
+      page,
+      limit
     );
     res.json({
       status: {

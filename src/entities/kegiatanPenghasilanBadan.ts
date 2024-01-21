@@ -9,9 +9,9 @@ export type KegiatanPenghasilanBadan = {
   kodeWPBadan: string;
   penghasilanBruto: number;
   kodeObjek: string;
-  invoice: string | Buffer;
-  fakturPajak?: string | Buffer;
-  dokumenKerjasamaKegiatan: string | Buffer;
+  invoice: string;
+  fakturPajak?: string;
+  dokumenKerjasamaKegiatan: string;
   status: string;
   idl: string;
 };
