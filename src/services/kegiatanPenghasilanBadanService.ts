@@ -133,14 +133,14 @@ export const createPPh23 = async (input: CreatePph23Param) => {
 };
 
 export const getAllPPh23 = async (
-  data: GetPph23List,
-  page: number,
-  limit: number
+  data: GetPph23List
+  // page: number,
+  // limit: number
 ) => {
   const kegiatanPenghasilanBadanUsahaList = data;
 
-  const take = limit;
-  const skip = (page - 1) * limit;
+  // const take = limit;
+  // const skip = (page - 1) * limit;
 
   return prisma.kegiatanPenghasilanBadan.findMany({
     where: {
@@ -148,8 +148,8 @@ export const getAllPPh23 = async (
       kodeJenisPajak: 2,
       idl: data.idl,
     },
-    skip: skip,
-    take: take,
+    // skip: skip,
+    // take: take,
   });
 };
 
