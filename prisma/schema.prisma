@@ -283,7 +283,6 @@ model KegiatanPenghasilanBadan {
   kodePeriodeOtorisasi     String?   @map("kode_periode_otorisasi") @db.VarChar(20)
   status                   String    @db.VarChar(100)
   idl                      String    @db.VarChar(100)
-  increment                BigInt?   @default(autoincrement()) @db.BigInt
 
   @@map("kegiatan_penghasilan_badan")
 }

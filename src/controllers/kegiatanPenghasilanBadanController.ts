@@ -209,7 +209,7 @@ export const createPPh23 = async (
       const body: KegiatanPenghasilanBadan = {
         ...req.body,
         kodeKegiatanBadan: await generateKodeKegiatanBadan(),
-        tanggalInput: moment().tz('Asia/Jakarta').format('Z'),
+        tanggalInput: moment().tz('Asia/Jakarta').format(),
         kodeJenisPajak: 2,
         status: 'Entry',
         kodeJenisPenghasilan: Number(req.body?.kodeJenisPenghasilan),
