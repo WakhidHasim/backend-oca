@@ -10,8 +10,15 @@ import * as kegiatanPenghasilanBadanService from '../services/kegiatanPenghasila
 import {
   createKegiatanBadanUsahaSchema,
   CreateKegiatanBadanUsahaInput,
+  updateKegiatanBadanUsahaSchema,
+  UpdateKegiatanBadanUsahaInput,
 } from '../validation/kegiatanBadanUsahaSchema';
 import { KegiatanPenghasilanBadan } from '../entities/kegiatanPenghasilanBadan';
+
+type updateKegiatanPenghasilanBadan = Omit<
+  KegiatanPenghasilanBadan,
+  'kodeKegiatanBadan' | 'tanggalInput' | 'kodeJenisPajak' | 'status'
+>;
 
 const storageFilePPh23 = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -263,12 +270,15 @@ export const createPPh23 = async (
           },
           result: error.message,
         });
-        return;
+      } else {
+        res.status(500).json({
+          status: {
+            code: 500,
+            description: 'Internal Server Error',
+          },
+          result: 'Internal Server Error',
+        });
       }
-
-      console.log(error);
-
-      return res.status(500).json({ message: 'internal server error' });
     }
   });
 };
@@ -276,13 +286,13 @@ export const createPPh23 = async (
 export const getAllPph23 = async (req: Request, res: Response) => {
   try {
     const queryParameters = req.query;
-    // const page = parseInt(queryParameters.page as string) || 1;
-    // const limit = 1;
+    const page = parseInt(queryParameters.page as string) || 1;
+    const limit = parseInt(queryParameters.limit as string) || 10;
 
     const getAllPPh23 = await kegiatanPenghasilanBadanService.getAllPPh23(
-      queryParameters
-      // page,
-      // limit
+      queryParameters,
+      page,
+      limit
     );
     res.json({
       status: {
@@ -291,7 +301,7 @@ export const getAllPph23 = async (req: Request, res: Response) => {
       },
       result: getAllPPh23,
     });
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof BadRequestError) {
       res.status(400).json({
         status: {
@@ -300,12 +310,16 @@ export const getAllPph23 = async (req: Request, res: Response) => {
         },
         result: error.message,
       });
-      return;
+    } else {
+      console.log(error.message);
+      res.status(500).json({
+        status: {
+          code: 500,
+          description: 'Internal Server Error',
+        },
+        result: 'Internal Server Error',
+      });
     }
-
-    console.log(error);
-
-    return res.status(500).json({ message: 'internal server error' });
   }
 };
 
@@ -332,12 +346,15 @@ export const getPPh23ById = async (req: Request, res: Response) => {
         },
         result: error.message,
       });
-      return;
+    } else {
+      res.status(500).json({
+        status: {
+          code: 500,
+          description: 'Internal Server Error',
+        },
+        result: 'Internal Server Error',
+      });
     }
-
-    console.log(error);
-
-    return res.status(500).json({ message: 'internal server error' });
   }
 };
 
@@ -430,12 +447,15 @@ export const updatePPh23 = async (req: Request, res: Response) => {
           },
           result: error.message,
         });
-        return;
+      } else {
+        res.status(500).json({
+          status: {
+            code: 500,
+            description: 'Internal Server Error',
+          },
+          result: 'Internal Server Error',
+        });
       }
-
-      console.log(error);
-
-      return res.status(500).json({ message: 'internal server error' });
     }
   });
 };
@@ -492,64 +512,99 @@ export const deletePPh23 = async (req: Request, res: Response) => {
         },
         result: error.message,
       });
-      return;
+    } else {
+      res.status(500).json({
+        status: {
+          code: 500,
+          description: 'Internal Server Error',
+        },
+        result: 'Internal Server Error',
+      });
     }
-
-    console.log(error);
-
-    return res.status(500).json({ message: 'internal server error' });
   }
 };
 
 // PPh 4 ayat 2
 export const createPPh4Ayat2 = async (req: Request, res: Response) => {
-  try {
-    uploadFieldsPPh4(req, res, async (err) => {
-      if (err) {
-        return res.status(400).json({ message: err.message });
-      }
-
-      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+  uploadFieldsPPh4(req, res, async (err) => {
+    handleFileUploadErrors(err, req, res, async () => {});
+    try {
+      const files = req.files as {
+        [fieldname: string]: Express.Multer.File[];
+      };
 
       const invoiceFile = files['invoice']?.[0];
       const fakturPajakFile = files['fakturPajak']?.[0];
       const dokumenKerjasamaKegiatanFile =
         files['dokumenKerjasamaKegiatan']?.[0];
 
-      const createPPh4Ayat2 =
-        await kegiatanPenghasilanBadanService.createPPh4Ayat2({
-          ...req.body,
-          kodeKegiatanBadan: await generateKodeKegiatanBadan(),
-          kodeJenisPenghasilan: Number(req.body?.kodeJenisPenghasilan),
-          penghasilanBruto: Number(req.body?.penghasilanBruto),
-          invoice: invoiceFile?.filename,
-          fakturPajak: fakturPajakFile?.filename,
-          dokumenKerjasamaKegiatan: dokumenKerjasamaKegiatanFile?.filename,
+      const body: KegiatanPenghasilanBadan = {
+        ...req.body,
+        kodeKegiatanBadan: await generateKodeKegiatanBadan(),
+        tanggalInput: moment().tz('Asia/Jakarta').format(),
+        kodeJenisPajak: 3,
+        status: 'Entry',
+        kodeJenisPenghasilan: Number(req.body?.kodeJenisPenghasilan),
+        penghasilanBruto: Number(req.body?.penghasilanBruto),
+        invoice: invoiceFile?.filename,
+        fakturPajak: fakturPajakFile?.filename,
+        dokumenKerjasamaKegiatan: dokumenKerjasamaKegiatanFile?.filename,
+      };
+      const validationResult = createKegiatanBadanUsahaSchema.safeParse(body);
+
+      if (validationResult.success) {
+        const result = validationResult.data;
+
+        const requestBody: KegiatanPenghasilanBadan = {
+          ...result,
+          kodeKegiatanBadan: body.kodeKegiatanBadan,
+          tanggalInput: body.tanggalInput,
+          kodeJenisPajak: body.kodeJenisPajak,
+          status: body.status,
+          invoice: body.invoice,
+          fakturPajak: body.fakturPajak,
+          dokumenKerjasamaKegiatan: body.dokumenKerjasamaKegiatan,
+        };
+
+        const craetePPh4 =
+          await kegiatanPenghasilanBadanService.createPPh4Ayat2(requestBody);
+
+        res.json({
+          status: {
+            code: 200,
+            description: 'Ok',
+          },
+          result: craetePPh4,
         });
-
-      res.json({
-        status: {
-          code: 200,
-          description: 'Ok',
-        },
-        result: createPPh4Ayat2,
-      });
-    });
-  } catch (error) {
-    if (error instanceof BadRequestError) {
-      res.status(400).json({
-        status: {
-          code: 400,
-          description: 'Bad Request',
-        },
-        result: error.message,
-      });
-      return;
+      } else {
+        res.status(400).json({
+          status: {
+            code: 400,
+            description: 'Bad Request',
+          },
+          result: validationResult.error.errors,
+        });
+      }
+    } catch (error) {
+      if (error instanceof BadRequestError) {
+        res.status(400).json({
+          status: {
+            code: 400,
+            description: 'Bad Request',
+          },
+          result: error.message,
+        });
+      } else {
+        res.status(500).json({
+          status: {
+            code: 500,
+            description: 'Internal Server Error',
+          },
+          result: 'Internal Server Error',
+        });
+      }
     }
-    console.log(error);
-
-    return res.status(500).json({ message: 'internal server error' });
-  }
+  });
 };
 
 export const getAllPPh4Ayat2 = async (req: Request, res: Response) => {
@@ -573,12 +628,15 @@ export const getAllPPh4Ayat2 = async (req: Request, res: Response) => {
         },
         result: error.message,
       });
-      return;
+    } else {
+      res.status(500).json({
+        status: {
+          code: 500,
+          description: 'Internal Server Error',
+        },
+        result: 'Internal Server Error',
+      });
     }
-
-    console.log(error);
-
-    return res.status(500).json({ message: 'internal server error' });
   }
 };
 
@@ -604,12 +662,15 @@ export const getPPh4Ayat2ById = async (req: Request, res: Response) => {
         },
         result: error.message,
       });
-      return;
+    } else {
+      res.status(500).json({
+        status: {
+          code: 500,
+          description: 'Internal Server Error',
+        },
+        result: 'Internal Server Error',
+      });
     }
-
-    console.log(error);
-
-    return res.status(500).json({ message: 'internal server error' });
   }
 };
 
@@ -705,12 +766,15 @@ export const updatePPh4Ayat2 = async (req: Request, res: Response) => {
         },
         result: error.message,
       });
-      return;
+    } else {
+      res.status(500).json({
+        status: {
+          code: 500,
+          description: 'Internal Server Error',
+        },
+        result: 'Internal Server Error',
+      });
     }
-
-    console.log(error);
-
-    return res.status(500).json({ message: 'internal server error' });
   }
 };
 
@@ -765,11 +829,14 @@ export const deletePPh4Ayat2 = async (req: Request, res: Response) => {
         },
         result: error.message,
       });
-      return;
+    } else {
+      res.status(500).json({
+        status: {
+          code: 500,
+          description: 'Internal Server Error',
+        },
+        result: 'Internal Server Error',
+      });
     }
-
-    console.log(error);
-
-    return res.status(500).json({ message: 'internal server error' });
   }
 };

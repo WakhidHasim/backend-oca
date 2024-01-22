@@ -263,7 +263,7 @@ model KegiatanPenghasilanBadan {
   kodeJenisPenghasilan     Int       @map("kode_jenis_penghasilan") @db.Integer
   kodeJenisPajak           Int       @map("kode_jenis_pajak") @db.Integer
   npwp                     String?   @db.VarChar(30)
-  pic                      String    @db.VarChar(20)
+  picPencairanPenghasilan  String    @map("pic_pencairan_penghasilan") @db.VarChar(10)
   kodeWPBadan              String    @map("kode_wp_badan") @db.VarChar(50)
   penghasilanBruto         Int       @map("penghasilan_bruto") @db.Integer
   kodeObjek                String    @map("kode_objek") @db.VarChar(20)

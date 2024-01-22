@@ -34,6 +34,27 @@ export const createKegiatanBadanUsahaSchema = z.object({
   }),
 });
 
+export const updateKegiatanBadanUsahaSchema = z
+  .object({
+    kodeKegiatanBadan: z.string(),
+    uraianKegiatan: z.string(),
+    idKegiatanAnggaran: z.string(),
+    kodeJenisPenghasilan: z.number(),
+    kodeWPBadan: z.string(),
+    penghasilanBruto: z.number(),
+    kodeObjek: z.string(),
+    invoice: z.string(),
+    fakturPajak: z.string().optional(),
+    dokumenKerjasamaKegiatan: z.string(),
+    pic: z.string(),
+    idl: z.string(),
+  })
+  .partial();
+
 export type CreateKegiatanBadanUsahaInput = TypeOf<
   typeof createKegiatanBadanUsahaSchema
+>;
+
+export type UpdateKegiatanBadanUsahaInput = TypeOf<
+  typeof updateKegiatanBadanUsahaSchema
 >;

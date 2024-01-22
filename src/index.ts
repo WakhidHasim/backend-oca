@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import { authenticateJwtMiddleware } from './middleware/authMiddleware';
 import { validationErrorHandler } from './middleware/errorMiddleware';
 
+import dashboardRoutes from './routes/dashboardRoutes';
 import agentRoutes from './routes/agentRoutes';
 import bankRoutes from './routes/bankRoutes';
 import negaraRoutes from './routes/negaraRoutes';
@@ -31,11 +32,12 @@ app.use(validationErrorHandler);
 
 app.use(
   cors({
-    origin: '*',
+    origin: ['https://taon.qlm.one/'],
   })
 );
 
 app.use('/api/agent/login', agentRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/bank', bankRoutes);
 app.use('/api/negara', negaraRoutes);
 app.use('/api/jenis-penghasilan', jenisPenghasilanRoutes);
