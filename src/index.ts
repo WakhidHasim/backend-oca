@@ -30,11 +30,22 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(validationErrorHandler);
 
-app.use(
-  cors({
-    origin: ['https://taon.qlm.one/'],
-  })
-);
+const allowlist = ['https://taon.qlm.one', 'http://localhost:5173'];
+
+const corsOptions: cors.CorsOptions = {
+  origin: (
+    origin: string | undefined,
+    callback: (err: Error | null, allow?: boolean) => void
+  ) => {
+    if (!origin || allowlist.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+};
+
+app.use(cors(corsOptions));
 
 app.use('/api/agent/login', agentRoutes);
 app.use('/api/dashboard', dashboardRoutes);
