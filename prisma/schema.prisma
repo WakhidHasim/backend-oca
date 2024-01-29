@@ -152,52 +152,52 @@ model PengajuanAnggaran {
 }
 
 model WajibPajakOrangPribadi {
-  kodeWPOP               String    @id @map("kode_wpop") @db.VarChar(50)
-  nama                   String    @db.VarChar(100)
-  email                  String    @db.VarChar(200)
-  password               String?   @db.VarChar(255)
-  kewarganegaraan        String    @db.VarChar(5)
-  namaNegara             String    @map("nama_negara") @db.VarChar(100)
-  idOrangPribadi         String    @map("id_orang_pribadi") @db.VarChar(30)
-  namaIdentitas          String    @map("nama_identitas") @db.VarChar(100)
-  masaBerlakuPassport    DateTime? @map("masa_berlaku_passport")
-  npwp                   String?   @db.VarChar(30)
-  namaNpwp               String?   @map("nama_npwp") @db.VarChar(100)
-  kotaNpwp               String?   @map("kota_npwp") @db.VarChar(50)
-  bankTransfer           String?   @map("bank_transfer") @db.VarChar(50)
-  noRekening             String?   @map("no_rekening") @db.VarChar(30)
-  namaRekening           String?   @map("nama_rekening") @db.VarChar(100)
-  nip                    String?   @db.VarChar(50)
-  statusPegawai          String?   @map("status_pegawai") @db.VarChar(30)
-  fileFotoNpwp           String?   @map("file_foto_npwp") @db.VarChar(255)
-  fileFotoIdOrangPribadi String    @map("file_foto_id_orang_pribadi") @db.VarChar(255)
-  fileFotoBuktiRekening  String?   @map("file_foto_bukti_rekening") @db.VarChar(255)
-  isApproved             Boolean   @map("is_approved") @db.Boolean
-  tanggalInput           DateTime? @map("tanggal_input")
+  kodeWajibPajakOrangPribadi String    @id @default(uuid()) @map("kode_wajib_pajak_orang_pribadi")
+  nama                       String    @db.VarChar(100)
+  email                      String    @db.VarChar(200)
+  password                   String?   @db.VarChar(255)
+  kewarganegaraan            String    @db.VarChar(5)
+  namaNegara                 String    @map("nama_negara") @db.VarChar(100)
+  idOrangPribadi             String    @map("id_orang_pribadi") @db.VarChar(30)
+  namaIdentitas              String    @map("nama_identitas") @db.VarChar(100)
+  masaBerlakuPassport        DateTime? @map("masa_berlaku_passport")
+  npwp                       String?   @db.VarChar(30)
+  namaNpwp                   String?   @map("nama_npwp") @db.VarChar(100)
+  kotaNpwp                   String?   @map("kota_npwp") @db.VarChar(50)
+  bankTransfer               String?   @map("bank_transfer") @db.VarChar(50)
+  noRekening                 String?   @map("no_rekening") @db.VarChar(30)
+  namaRekening               String?   @map("nama_rekening") @db.VarChar(100)
+  nip                        String?   @db.VarChar(50)
+  statusPegawai              String?   @map("status_pegawai") @db.VarChar(30)
+  fileFotoNpwp               String?   @map("file_foto_npwp") @db.VarChar(255)
+  fileFotoIdOrangPribadi     String    @map("file_foto_id_orang_pribadi") @db.VarChar(255)
+  fileFotoBuktiRekening      String?   @map("file_foto_bukti_rekening") @db.VarChar(255)
+  isApproved                 Boolean   @map("is_approved") @db.Boolean
+  tanggalInput               DateTime? @map("tanggal_input") @db.Timestamptz()
 
   @@map("wajib_pajak_orang_pribadi")
 }
 
 model WajibPajakBadanUsaha {
-  kodeWPBadan            String    @id @map("kode_wpbadan") @db.VarChar(50)
-  namaBadan              String    @map("nama_badan") @db.VarChar(100)
-  email                  String    @db.VarChar(200)
-  npwp                   String?   @db.VarChar(30)
-  namaNpwp               String?   @map("nama_npwp") @db.VarChar(100)
-  kotaNpwp               String?   @map("kota_npwp") @db.VarChar(50)
-  bankTransfer           String?   @map("bank_transfer") @db.VarChar(50)
-  noRekening             String?   @map("no_rekening") @db.VarChar(30)
-  namaRekening           String?   @map("nama_rekening") @db.VarChar(100)
-  namaNaraHubung         String    @map("nama_narahubung") @db.VarChar(100)
-  kontakNaraHubung       String    @map("kontak_narahubung") @db.VarChar(15)
-  adaSkbPPh23            String    @map("ada_skb_pph23") @db.VarChar(3)
-  masaBerlakuBebasPPh23  DateTime? @map("masa_berlaku_bebas_pph23") @db.Date
-  fileFotoIdentitasBadan String    @map("file_foto_identitas_badan") @db.VarChar(255)
-  fileFotoBuktiRekening  String    @map("file_foto_bukti_rekening") @db.VarChar(255)
-  fileFotoNpwp           String?   @map("file_foto_npwp") @db.VarChar(255)
-  fileSuratBebasPPh23    String?   @map("file_surat_bebas_pph23") @db.VarChar(255)
-  statusPkp              String    @map("status_pkp") @db.VarChar(3)
-  tanggalInput           DateTime? @map("tanggal_input")
+  kodeWajibPajakBadanUsaha String    @id @default(uuid()) @map("kode_wajib_pajak_badan_usaha")
+  namaBadan                String    @map("nama_badan") @db.VarChar(100)
+  email                    String    @db.VarChar(200)
+  npwp                     String?   @db.VarChar(30)
+  namaNpwp                 String?   @map("nama_npwp") @db.VarChar(100)
+  kotaNpwp                 String?   @map("kota_npwp") @db.VarChar(50)
+  bankTransfer             String?   @map("bank_transfer") @db.VarChar(50)
+  noRekening               String?   @map("no_rekening") @db.VarChar(30)
+  namaRekening             String?   @map("nama_rekening") @db.VarChar(100)
+  namaNaraHubung           String    @map("nama_narahubung") @db.VarChar(100)
+  kontakNaraHubung         String    @map("kontak_narahubung") @db.VarChar(15)
+  adaSkbPPh23              String    @map("ada_skb_pph23") @db.VarChar(3)
+  masaBerlakuBebasPPh23    DateTime? @map("masa_berlaku_bebas_pph23") @db.Date
+  fileFotoIdentitasBadan   String    @map("file_foto_identitas_badan") @db.VarChar(255)
+  fileFotoBuktiRekening    String    @map("file_foto_bukti_rekening") @db.VarChar(255)
+  fileFotoNpwp             String?   @map("file_foto_npwp") @db.VarChar(255)
+  fileSuratBebasPPh23      String?   @map("file_surat_bebas_pph23") @db.VarChar(255)
+  statusPkp                String    @map("status_pkp") @db.VarChar(3)
+  tanggalInput             DateTime? @map("tanggal_input") @db.Timestamptz()
 
   @@map("wajib_pajak_badan_usaha")
 }
@@ -212,8 +212,8 @@ model JenisPenghasilan {
 }
 
 model KegiatanPenghasilanOP {
-  kodeKegiatanOP            String    @id @map("kode_kegiatan_op") @db.VarChar(50)
-  tanggalInput              DateTime  @map("tanggal_input")
+  kodeKegiatanOP            String    @id @default(uuid()) @map("kode_kegiatan_op")
+  tanggalInput              DateTime  @map("tanggal_input") @db.Timestamptz()
   kodeJenisPenghasilan      Int       @map("kode_jenis_penghasilan") @db.Integer
   uraianKegiatan            String    @map("uraian_kegiatan") @db.VarChar(200)
   idKegiatanAnggaran        String    @map("id_kegiatan_anggaran") @db.VarChar(20)
@@ -234,29 +234,30 @@ model KegiatanPenghasilanOP {
 }
 
 model ItemKegiatanPenghasilanOP {
-  KodeItemKegiatanOP  String  @id @map("kode_item_kegiatan_op") @db.VarChar(50)
-  kodeKegiatanOP      String  @map("kode_kegiatan_op") @db.VarChar(50)
-  kodeWPOP            String  @map("kode_wpop") @db.VarChar(50)
-  statusPegawai       String  @map("status_pegawai") @db.VarChar(30)
-  npwp                String? @db.VarChar(30)
+  KodeItemKegiatanOP  String   @id @default(uuid()) @map("kode_item_kegiatan_op")
+  kodeKegiatanOP      String   @map("kode_kegiatan_op") @db.VarChar(50)
+  kodeWPOP            String   @map("kode_wpop") @db.VarChar(50)
+  statusPegawai       String   @map("status_pegawai") @db.VarChar(30)
+  npwp                String?  @db.VarChar(30)
   lapisan             Int?
-  bankTransfer        String? @map("bank_transfer") @db.VarChar(50)
-  noRekening          String? @map("no_rekening") @db.VarChar(30)
-  namaRekening        String? @map("nama_rekening") @db.VarChar(100)
-  penghasilanBruto    Int     @map("penghasilan_bruto") @db.Integer
-  kodeObjek           String  @map("kode_objek") @db.VarChar(20)
-  tarifBerlaku        Float   @map("tarif_berlaku")
-  potonganPajak       Int     @map("potongan_pajak") @db.Integer
-  penghasilanDiterima Int     @map("penghasilan_diterima") @db.Integer
-  metodePotong        String  @map("metode_potong") @db.VarChar(50)
-  fileBuktiPotong     String? @map("file_bukti_potong") @db.VarChar(255)
-  status              String  @db.VarChar(50)
+  bankTransfer        String?  @map("bank_transfer") @db.VarChar(50)
+  noRekening          String?  @map("no_rekening") @db.VarChar(30)
+  namaRekening        String?  @map("nama_rekening") @db.VarChar(100)
+  penghasilanBruto    Int      @map("penghasilan_bruto") @db.Integer
+  kodeObjek           String   @map("kode_objek") @db.VarChar(20)
+  tarifBerlaku        Float    @map("tarif_berlaku")
+  potonganPajak       Int      @map("potongan_pajak") @db.Integer
+  penghasilanDiterima Int      @map("penghasilan_diterima") @db.Integer
+  metodePotong        String   @map("metode_potong") @db.VarChar(50)
+  fileBuktiPotong     String?  @map("file_bukti_potong") @db.VarChar(255)
+  status              String   @db.VarChar(50)
+  tanggalInput        DateTime @map("tanggal_input") @db.Timestamptz()
 
   @@map("item_kegiatan_penghasilan_op")
 }
 
 model KegiatanPenghasilanBadan {
-  kodeKegiatanBadan        String    @id @map("kode_kegiatan_badan") @db.VarChar(50)
+  kodeKegiatanBadan        String    @id @default(uuid()) @map("kode_kegiatan_badan")
   tanggalInput             DateTime  @map("tanggal_input") @db.Timestamptz()
   uraianKegiatan           String    @map("uraian_kegiatan") @db.VarChar(200)
   idKegiatanAnggaran       String    @map("id_kegiatan_anggaran") @db.VarChar(20)
@@ -264,7 +265,7 @@ model KegiatanPenghasilanBadan {
   kodeJenisPajak           Int       @map("kode_jenis_pajak") @db.Integer
   npwp                     String?   @db.VarChar(30)
   picPencairanPenghasilan  String    @map("pic_pencairan_penghasilan") @db.VarChar(10)
-  kodeWPBadan              String    @map("kode_wp_badan") @db.VarChar(50)
+  kodeWajibPajakBadanUsaha String    @map("kode_wajib_pajak_badan_usaha") @db.VarChar(50)
   penghasilanBruto         Int       @map("penghasilan_bruto") @db.Integer
   kodeObjek                String    @map("kode_objek") @db.VarChar(20)
   tarifPajak               Float     @map("tarif_pajak")
@@ -288,7 +289,7 @@ model KegiatanPenghasilanBadan {
 }
 
 model InventarisasiPajak {
-  idInventarisasiPajak String   @id @map("id_inventarisasi_pajak") @db.VarChar(50)
+  idInventarisasiPajak String   @id @default(uuid()) @map("id_inventarisasi_pajak")
   uraianKegiatan       String   @map("uraian_kegiatan") @db.VarChar(200)
   idKegiatanAnggaran   String   @map("id_kegiatan_anggaran") @db.VarChar(20)
   nominalDPP           Int      @map("nominal_dpp") @db.Integer
@@ -298,7 +299,7 @@ model InventarisasiPajak {
   npwpPemotong         String?  @map("npwp_pemotong") @db.VarChar(30)
   namaPemotong         String?  @map("nama_pemotong") @db.VarChar(100)
   idl                  String   @db.VarChar(100)
-  tanggalInput         DateTime @map("tanggal_input")
+  tanggalInput         DateTime @map("tanggal_input") @db.Timestamptz()
 
   @@map("inventarisasi_pajak")
 }

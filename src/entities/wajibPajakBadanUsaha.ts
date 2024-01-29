@@ -1,5 +1,4 @@
 export type WajibPajakBadanUsaha = {
-  kodeWPBadan: string;
   namaBadan: string;
   email: string;
   npwp?: string;
@@ -10,11 +9,12 @@ export type WajibPajakBadanUsaha = {
   namaRekening?: string;
   namaNaraHubung: string;
   kontakNaraHubung: string;
-  adaSkbPPh23: boolean;
-  masaBerlakuBebasPPh23?: Date;
+  adaSkbPPh23: string;
+  masaBerlakuBebasPPh23?: string;
   fileFotoIdentitasBadan: string;
   fileFotoBuktiRekening: string;
   fileFotoNpwp?: string;
   fileSuratBebasPPh23?: string;
   statusPkp: string;
+  tanggalInput: string;
 };

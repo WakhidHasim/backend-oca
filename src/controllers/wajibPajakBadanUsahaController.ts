@@ -2,10 +2,14 @@ import { Request, Response, NextFunction, Express } from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-
+import moment from 'moment-timezone';
 import BadRequestError from '../error/BadRequestError';
-
+import {
+  createWajibPajakBadanUsahaSchema,
+  createWajibPajakBadanUsahaInput,
+} from '../validation/wajibPajakBadanUsahaSchema';
 import * as wajibPajakBadanUsahaService from '../services/wajibPajakBadanUsahaService';
+import { WajibPajakBadanUsaha } from '../entities/wajibPajakBadanUsaha';
 
 const storageFile = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -121,10 +125,13 @@ const handleFileUploadErrors = (
   }
 };
 
-export const createWPBU = async (req: Request, res: Response) => {
-  try {
-    uploadFieldsWPBU(req, res, async (err) => {
-      handleFileUploadErrors(err, req, res, async () => {
+export const createWPBU = async (
+  req: Request<{}, {}, createWajibPajakBadanUsahaInput>,
+  res: Response
+) => {
+  uploadFieldsWPBU(req, res, async (err) => {
+    handleFileUploadErrors(err, req, res, async () => {
+      try {
         const files = req.files as {
           [fieldname: string]: Express.Multer.File[];
         };
@@ -134,39 +141,76 @@ export const createWPBU = async (req: Request, res: Response) => {
         const fileFotoNpwp = files['fileFotoNpwp']?.[0];
         const fileSuratBebasPPh23 = files['fileSuratBebasPPh23']?.[0];
 
-        const createWPBU = await wajibPajakBadanUsahaService.createWPBU({
+        const formattedDate = moment()
+          .tz('Asia/Jakarta')
+          .format('YYYY-MM-DDTHH:mm:ss');
+
+        const body: WajibPajakBadanUsaha = {
           ...req.body,
+          tanggalInput: formattedDate + '+07:00',
           fileFotoIdentitasBadan: fileFotoIdentitasBadan?.filename,
           fileFotoBuktiRekening: fileFotoBuktiRekening?.filename,
           fileFotoNpwp: fileFotoNpwp?.filename,
           fileSuratBebasPPh23: fileSuratBebasPPh23?.filename,
-        });
+        };
 
-        res.json({
-          status: {
-            code: 200,
-            description: 'Ok',
-          },
-          result: createWPBU,
-        });
-      });
+        const validationResult =
+          createWajibPajakBadanUsahaSchema.safeParse(body);
+
+        if (validationResult.success) {
+          const result = validationResult.data;
+
+          const requestBody: WajibPajakBadanUsaha = {
+            ...result,
+            tanggalInput: body.tanggalInput,
+            fileFotoIdentitasBadan: body.fileFotoIdentitasBadan,
+            fileFotoBuktiRekening: body.fileFotoBuktiRekening,
+            fileFotoNpwp: body.fileFotoNpwp,
+            fileSuratBebasPPh23: body.fileSuratBebasPPh23,
+          };
+
+          const createWPBU = await wajibPajakBadanUsahaService.createWPBU(
+            requestBody
+          );
+
+          res.json({
+            status: {
+              code: 200,
+              description: 'Ok',
+            },
+            result: { ...createWPBU, tanggalInput: formattedDate + '+07:00' },
+          });
+        } else {
+          res.status(400).json({
+            status: {
+              code: 400,
+              description: 'Bad Request',
+            },
+            result: validationResult.error.errors,
+          });
+        }
+      } catch (error: any) {
+        if (error instanceof BadRequestError) {
+          res.status(400).json({
+            status: {
+              code: 400,
+              description: 'Bad Request',
+            },
+            result: error.message,
+          });
+        } else {
+          console.log('error message:', error.message);
+          res.status(500).json({
+            status: {
+              code: 500,
+              description: 'Internal Server Error',
+            },
+            result: 'Internal Server Error',
+          });
+        }
+      }
     });
-  } catch (error) {
-    if (error instanceof BadRequestError) {
-      res.status(400).json({
-        status: {
-          code: 400,
-          description: 'Bad Request',
-        },
-        result: error.message,
-      });
-      return;
-    }
-
-    console.log(error);
-
-    return res.status(500).json({ message: 'internal server error' });
-  }
+  });
 };
 
 export const wpbuList = async (req: Request, res: Response) => {

@@ -10,8 +10,8 @@ export const createKegiatanBadanUsahaSchema = z.object({
   kodeJenisPenghasilan: z.number({
     required_error: 'Kode Jenis Penghasilan harus diisi !',
   }),
-  kodeWPBadan: z.string({
-    required_error: 'Kode WP Badan harus diisi !',
+  kodeWajibPajakBadanUsaha: z.string({
+    required_error: 'Kode Wajib Pajak Badan Usaha harus diisi !',
   }),
   penghasilanBruto: z.number({
     required_error: 'Penghasilan Bruto harus diisi !',
@@ -26,7 +26,7 @@ export const createKegiatanBadanUsahaSchema = z.object({
   dokumenKerjasamaKegiatan: z.string({
     required_error: 'Dokumen Kerjasama Kegiatan harus diisi !',
   }),
-  pic: z.string({
+  picPencairanPenghasilan: z.string({
     required_error: 'PIC harus diisi !',
   }),
   idl: z.string({
@@ -34,27 +34,6 @@ export const createKegiatanBadanUsahaSchema = z.object({
   }),
 });
 
-export const updateKegiatanBadanUsahaSchema = z
-  .object({
-    kodeKegiatanBadan: z.string(),
-    uraianKegiatan: z.string(),
-    idKegiatanAnggaran: z.string(),
-    kodeJenisPenghasilan: z.number(),
-    kodeWPBadan: z.string(),
-    penghasilanBruto: z.number(),
-    kodeObjek: z.string(),
-    invoice: z.string(),
-    fakturPajak: z.string().optional(),
-    dokumenKerjasamaKegiatan: z.string(),
-    pic: z.string(),
-    idl: z.string(),
-  })
-  .partial();
-
 export type CreateKegiatanBadanUsahaInput = TypeOf<
   typeof createKegiatanBadanUsahaSchema
->;
-
-export type UpdateKegiatanBadanUsahaInput = TypeOf<
-  typeof updateKegiatanBadanUsahaSchema
 >;

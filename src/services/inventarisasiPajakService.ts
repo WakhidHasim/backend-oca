@@ -26,7 +26,6 @@ export const createInventarisasiPajak = async (
   try {
     const requestBody = createInventarisasiPajakSchema.parse(data);
 
-    // Validate and find PengajuanAnggaran
     const pengajuanAnggaran = await prisma.PengajuanAnggaran.findUnique({
       where: { idKegiatanAnggaran: requestBody.idKegiatanAnggaran },
     });

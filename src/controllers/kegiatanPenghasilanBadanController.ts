@@ -3,15 +3,12 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import moment from 'moment-timezone';
-import { prisma } from '../config/database';
 import BadRequestError from '../error/BadRequestError';
 
 import * as kegiatanPenghasilanBadanService from '../services/kegiatanPenghasilanBadanService';
 import {
   createKegiatanBadanUsahaSchema,
   CreateKegiatanBadanUsahaInput,
-  updateKegiatanBadanUsahaSchema,
-  UpdateKegiatanBadanUsahaInput,
 } from '../validation/kegiatanBadanUsahaSchema';
 import { KegiatanPenghasilanBadan } from '../entities/kegiatanPenghasilanBadan';
 
@@ -173,30 +170,6 @@ const handleFileUploadErrors = (
   }
 };
 
-const generateKodeKegiatanBadan = async () => {
-  const currentYear = new Date().getFullYear();
-  const startDateOfYear = new Date(`${currentYear}-01-01`);
-  const endDateOfYear = new Date(`${currentYear}-12-31`);
-
-  const countData = await prisma.kegiatanPenghasilanBadan.count({
-    where: {
-      tanggalInput: {
-        gte: startDateOfYear,
-        lte: endDateOfYear,
-      },
-    },
-  });
-
-  const isNewYear = countData === 0;
-  const formattedCount = isNewYear
-    ? '00001'
-    : (countData + 1).toString().padStart(5, '0');
-
-  const yearInTwoDigits = currentYear.toString().substr(-2);
-
-  return `KBU${yearInTwoDigits}${formattedCount}`;
-};
-
 export const createPPh23 = async (
   req: Request<{}, {}, CreateKegiatanBadanUsahaInput>,
   res: Response
@@ -213,10 +186,13 @@ export const createPPh23 = async (
       const dokumenKerjasamaKegiatanFile =
         files['dokumenKerjasamaKegiatan']?.[0];
 
+      const formattedDate = moment()
+        .tz('Asia/Jakarta')
+        .format('YYYY-MM-DDTHH:mm:ss');
+
       const body: KegiatanPenghasilanBadan = {
         ...req.body,
-        kodeKegiatanBadan: await generateKodeKegiatanBadan(),
-        tanggalInput: moment().tz('Asia/Jakarta').format(),
+        tanggalInput: formattedDate + '+07:00',
         kodeJenisPajak: 2,
         status: 'Entry',
         kodeJenisPenghasilan: Number(req.body?.kodeJenisPenghasilan),
@@ -232,7 +208,6 @@ export const createPPh23 = async (
 
         const requestBody: KegiatanPenghasilanBadan = {
           ...result,
-          kodeKegiatanBadan: body.kodeKegiatanBadan,
           tanggalInput: body.tanggalInput,
           kodeJenisPajak: body.kodeJenisPajak,
           status: body.status,
@@ -250,7 +225,7 @@ export const createPPh23 = async (
             code: 200,
             description: 'Ok',
           },
-          result: createPPh23,
+          result: { ...createPPh23, tanggalInput: formattedDate + '+07:00' },
         });
       } else {
         res.status(400).json({
@@ -261,7 +236,7 @@ export const createPPh23 = async (
           result: validationResult.error.errors,
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof BadRequestError) {
         res.status(400).json({
           status: {
@@ -271,6 +246,7 @@ export const createPPh23 = async (
           result: error.message,
         });
       } else {
+        console.log('error message:', error.message);
         res.status(500).json({
           status: {
             code: 500,
@@ -285,21 +261,24 @@ export const createPPh23 = async (
 
 export const getAllPph23 = async (req: Request, res: Response) => {
   try {
-    const queryParameters = req.query;
-    // const page = parseInt(queryParameters.page as string) || 1;
-    // const limit = parseInt(queryParameters.limit as string) || 10;
+    const { idl, page, limit } = req.query;
+    const pageNumber = parseInt(page as string) || 1;
+    const limitNumber = parseInt(limit as string) || 10;
 
-    const getAllPPh23 = await kegiatanPenghasilanBadanService.getAllPPh23(
-      queryParameters
-      // page,
-      // limit
-    );
+    const { results, pagination } =
+      await kegiatanPenghasilanBadanService.getAllPPh23(
+        { idl: idl as string },
+        pageNumber,
+        limitNumber
+      );
+
     res.json({
       status: {
         code: 200,
         description: 'OK',
       },
-      result: getAllPPh23,
+      result: results,
+      pagination,
     });
   } catch (error: any) {
     if (error instanceof BadRequestError) {
@@ -538,10 +517,13 @@ export const createPPh4Ayat2 = async (req: Request, res: Response) => {
       const dokumenKerjasamaKegiatanFile =
         files['dokumenKerjasamaKegiatan']?.[0];
 
+      const formattedDate = moment()
+        .tz('Asia/Jakarta')
+        .format('YYYY-MM-DDTHH:mm:ss');
+
       const body: KegiatanPenghasilanBadan = {
         ...req.body,
-        kodeKegiatanBadan: await generateKodeKegiatanBadan(),
-        tanggalInput: moment().tz('Asia/Jakarta').format(),
+        tanggalInput: formattedDate + '+07:00',
         kodeJenisPajak: 3,
         status: 'Entry',
         kodeJenisPenghasilan: Number(req.body?.kodeJenisPenghasilan),
@@ -557,7 +539,6 @@ export const createPPh4Ayat2 = async (req: Request, res: Response) => {
 
         const requestBody: KegiatanPenghasilanBadan = {
           ...result,
-          kodeKegiatanBadan: body.kodeKegiatanBadan,
           tanggalInput: body.tanggalInput,
           kodeJenisPajak: body.kodeJenisPajak,
           status: body.status,
@@ -574,7 +555,7 @@ export const createPPh4Ayat2 = async (req: Request, res: Response) => {
             code: 200,
             description: 'Ok',
           },
-          result: craetePPh4,
+          result: { ...craetePPh4, tanggalInput: formattedDate + '+07:00' },
         });
       } else {
         res.status(400).json({
@@ -609,15 +590,23 @@ export const createPPh4Ayat2 = async (req: Request, res: Response) => {
 
 export const getAllPPh4Ayat2 = async (req: Request, res: Response) => {
   try {
-    const queryParameters = req.query;
-    const getAllPPhAyat2 =
-      await kegiatanPenghasilanBadanService.getAllPPh4Ayat2(queryParameters);
+    const { idl, page, limit } = req.query;
+    const pageNumber = parseInt(page as string) || 1;
+    const limitNumber = parseInt(limit as string) || 10;
+
+    const { results, pagination } =
+      await kegiatanPenghasilanBadanService.getAllPPh4Ayat2(
+        { idl: idl as string },
+        pageNumber,
+        limitNumber
+      );
     res.json({
       status: {
         code: 200,
         description: 'OK',
       },
-      result: getAllPPhAyat2,
+      result: results,
+      pagination,
     });
   } catch (error) {
     if (error instanceof BadRequestError) {

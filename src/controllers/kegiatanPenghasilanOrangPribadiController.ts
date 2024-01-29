@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { prisma } from '../config/database';
+import moment from 'moment-timezone';
 import BadRequestError from '../error/BadRequestError';
 
 import * as kegiatanPenghasilanOPService from '../services/kegiatanPenghasilanOrangPribadiService';
@@ -8,30 +8,6 @@ import {
   CreateKegiatanOrangPribadiInput,
 } from '../validation/kegiatanPenghasikanOrangPribadiSchema';
 import { KegiatanPenghasilanOrangPribadi } from '../entities/kegiatanPenghasilanOrangPribadi';
-
-const generateKodeKegiatanOP = async () => {
-  const currentYear = new Date().getFullYear();
-  const startDateOfYear = new Date(`${currentYear}-01-01`);
-  const endDateOfYear = new Date(`${currentYear}-12-31`);
-
-  const countData = await prisma.kegiatanPenghasilanOP.count({
-    where: {
-      tanggalInput: {
-        gte: startDateOfYear,
-        lte: endDateOfYear,
-      },
-    },
-  });
-
-  const isNewYear = countData === 0;
-  const formattedCount = isNewYear
-    ? '00001'
-    : (countData + 1).toString().padStart(5, '0');
-
-  const yearInTwoDigits = currentYear.toString().substr(-2);
-
-  return `KOP${yearInTwoDigits}${formattedCount}`;
-};
 
 export const createKegiatanPenghasilanOP = async (
   req: Request<{}, {}, CreateKegiatanOrangPribadiInput>,
@@ -46,8 +22,7 @@ export const createKegiatanPenghasilanOP = async (
       const body = validationResult.data;
 
       const completeRequest: KegiatanPenghasilanOrangPribadi = {
-        kodeKegiatanOP: await generateKodeKegiatanOP(),
-        tanggalInput: new Date(),
+        tanggalInput: moment().tz('Asia/Jakarta').format(),
         kodeJenisPajak: 1,
         ...body,
       };
@@ -83,7 +58,6 @@ export const createKegiatanPenghasilanOP = async (
         result: error.message,
       });
     } else {
-      console.error('Unexpected error:', error);
       res.status(500).json({
         status: {
           code: 500,
@@ -99,30 +73,25 @@ export const getKegiatanPenghasilanOrangPribadiList = async (
   req: Request,
   res: Response
 ) => {
-  try {
-    const queryParameters = req.query;
-    const kegiatanPenghasilanBadanOP =
-      await kegiatanPenghasilanOPService.getKegiatanPenghasilanOPList(
-        queryParameters
-      );
-    res.json({
-      status: {
-        code: 200,
-        description: 'OK',
-      },
-      result: kegiatanPenghasilanBadanOP,
-    });
-  } catch (error) {
-    if (error instanceof BadRequestError) {
-      res.status(400).json({
-        status: {
-          code: 400,
-          description: 'Bad Request',
-        },
-        result: error.message,
-      });
-    }
-  }
+  const { idl, page, limit } = req.query;
+  const pageNumber = parseInt(page as string) || 1;
+  const limitNumber = parseInt(limit as string) || 10;
+
+  const { results, pagination } =
+    await kegiatanPenghasilanOPService.getKegiatanPenghasilanOPList(
+      { idl: idl as string },
+      pageNumber,
+      limitNumber
+    );
+
+  res.json({
+    status: {
+      code: 200,
+      description: 'OK',
+    },
+    result: results,
+    pagination,
+  });
 };
 
 export const updateKegiatanPenghasilanOP = async (

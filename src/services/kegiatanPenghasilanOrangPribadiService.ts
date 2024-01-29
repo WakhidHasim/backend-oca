@@ -20,84 +20,128 @@ type getListOpParam = {
 export const createKegiatanPenghasilanOrangPribadi = async (
   input: createKegiatanOrangPribadi
 ) => {
-  try {
-    const requestBody = input;
+  const requestBody = input;
 
-    const pengajuanAnggaran = await prisma.pengajuanAnggaran.findUnique({
-      where: { idKegiatanAnggaran: requestBody.idKegiatanAnggaran },
-    });
+  const pengajuanAnggaran = await prisma.pengajuanAnggaran.findUnique({
+    where: { idKegiatanAnggaran: requestBody.idKegiatanAnggaran },
+  });
 
-    if (!pengajuanAnggaran) {
-      throw new BadRequestError('Id Kegiatan Anggaran tidak ditemukan.');
-    }
-
-    const satuanKerja = await prisma.satuanKerja.findUnique({
-      where: { idl: requestBody.idl },
-    });
-
-    if (!satuanKerja) {
-      throw new BadRequestError('IDL tidak ditemukan.');
-    }
-
-    const jenisPenghasilan = await prisma.jenisPenghasilan.findUnique({
-      where: { kodeJenisPenghasilan: requestBody.kodeJenisPenghasilan },
-    });
-
-    if (!jenisPenghasilan) {
-      throw new BadRequestError('Kode Jenis Penghasilan tidak ditemukan.');
-    }
-
-    const createKegiatanOrangPribadi =
-      await prisma.kegiatanPenghasilanOP.create({
-        data: requestBody,
-      });
-
-    return {
-      kodeKegiatanOP: createKegiatanOrangPribadi.kodeKegiatanOP,
-      tanggalInput: createKegiatanOrangPribadi.tanggalInput,
-      uraianKegiatan: createKegiatanOrangPribadi.uraianKegiatan,
-      idKegiatanAnggaran: createKegiatanOrangPribadi.idKegiatanAnggaran,
-      kodeJenisPenghasilan: createKegiatanOrangPribadi.kodeJenisPenghasilan,
-      picPencairanPenghasilan:
-        createKegiatanOrangPribadi.picPencairanPenghasilan,
-      mintaBillingSendiri: createKegiatanOrangPribadi.mintaBillingSendiri,
-      idl: createKegiatanOrangPribadi.idl,
-    };
-  } catch (error) {
-    console.error('Error creating Kegiatan Penghasilan Orang Pribadi:', error);
-    throw error;
+  if (!pengajuanAnggaran) {
+    throw new BadRequestError('Id Kegiatan Anggaran tidak ditemukan.');
   }
+
+  const satuanKerja = await prisma.satuanKerja.findUnique({
+    where: { idl: requestBody.idl },
+  });
+
+  if (!satuanKerja) {
+    throw new BadRequestError('IDL tidak ditemukan.');
+  }
+
+  const jenisPenghasilan = await prisma.jenisPenghasilan.findUnique({
+    where: { kodeJenisPenghasilan: requestBody.kodeJenisPenghasilan },
+  });
+
+  if (!jenisPenghasilan) {
+    throw new BadRequestError('Kode Jenis Penghasilan tidak ditemukan.');
+  }
+
+  const createKegiatanOrangPribadi = await prisma.kegiatanPenghasilanOP.create({
+    data: requestBody,
+  });
+
+  return {
+    kodeKegiatanOP: createKegiatanOrangPribadi.kodeKegiatanOP,
+    tanggalInput: createKegiatanOrangPribadi.tanggalInput,
+    uraianKegiatan: createKegiatanOrangPribadi.uraianKegiatan,
+    idKegiatanAnggaran: createKegiatanOrangPribadi.idKegiatanAnggaran,
+    kodeJenisPenghasilan: createKegiatanOrangPribadi.kodeJenisPenghasilan,
+    picPencairanPenghasilan: createKegiatanOrangPribadi.picPencairanPenghasilan,
+    mintaBillingSendiri: createKegiatanOrangPribadi.mintaBillingSendiri,
+    idl: createKegiatanOrangPribadi.idl,
+  };
 };
 
-export const getKegiatanPenghasilanOPList = async (data: getListOpParam) => {
+export const getKegiatanPenghasilanOPList = async (
+  data: getListOpParam,
+  page: number,
+  limit: number
+) => {
   const kegiatanPenghasilanOrangPribadiList = data;
 
-  return prisma.kegiatanPenghasilanOP.findMany({
-    where: kegiatanPenghasilanOrangPribadiList,
+  const take = limit;
+  const skip = (page - 1) * limit;
+  const totalCount = await prisma.kegiatanPenghasilanOP.count({
+    where: {
+      ...kegiatanPenghasilanOrangPribadiList,
+      idl: data.idl,
+    },
   });
+  const totalPage = Math.ceil(totalCount / limit);
+  const currentPage = page || 0;
+
+  const results = await prisma.kegiatanPenghasilanOP.findMany({
+    where: {
+      ...kegiatanPenghasilanOrangPribadiList,
+      idl: data.idl,
+    },
+    orderBy: {
+      tanggalInput: 'desc',
+    },
+    skip,
+    take,
+  });
+
+  return {
+    results,
+    pagination: {
+      totalCount,
+      totalPage,
+      currentPage,
+    },
+  };
 };
 
 export const updateKegiatanPenghasilanOP = async (
   kodeKegiatanOP: string,
   updatedData: Partial<updateKegiatanOrangPribadi>
 ) => {
-  try {
-    if (!kodeKegiatanOP) {
-      throw new BadRequestError('Kode Kegiatan OP tidak ditemukan');
-    }
-
-    const updatedKegiatanOP = await prisma.kegiatanPenghasilanOP.update({
-      where: { kodeKegiatanOP },
-      data: {
-        ...updatedData,
-      },
-    });
-
-    return updatedKegiatanOP;
-  } catch (error) {
-    console.error('Error updating Kegiatan Penghasilan OP:', error);
-    throw error;
+  if (!kodeKegiatanOP) {
+    throw new BadRequestError('Kode Kegiatan OP tidak ditemukan');
   }
+
+  const pengajuanAnggaran = await prisma.pengajuanAnggaran.findUnique({
+    where: { idKegiatanAnggaran: updatedData.idKegiatanAnggaran },
+  });
+
+  if (!pengajuanAnggaran) {
+    throw new BadRequestError('Id Kegiatan Anggaran tidak ditemukan.');
+  }
+
+  const satuanKerja = await prisma.satuanKerja.findUnique({
+    where: { idl: updatedData.idl },
+  });
+
+  if (!satuanKerja) {
+    throw new BadRequestError('IDL tidak ditemukan.');
+  }
+
+  const jenisPenghasilan = await prisma.jenisPenghasilan.findUnique({
+    where: { kodeJenisPenghasilan: updatedData.kodeJenisPenghasilan },
+  });
+
+  if (!jenisPenghasilan) {
+    throw new BadRequestError('Kode Jenis Penghasilan tidak ditemukan.');
+  }
+
+  const updatedKegiatanOP = await prisma.kegiatanPenghasilanOP.update({
+    where: { kodeKegiatanOP },
+    data: {
+      ...updatedData,
+    },
+  });
+
+  return updatedKegiatanOP;
 };
 
 export const deleteKegiatanPenghasilanOP = async (kodeKegiatanOP: string) => {

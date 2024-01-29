@@ -9,13 +9,13 @@ type UpdatePph23Param = KegiatanPenghasilanBadan;
 
 type GetPph23List = {
   kodeKegiatanBadan?: string;
-  tanggalInput?: Date;
+  tanggalInput?: string;
   uraianKegiatan?: string;
   idKegiatanAnggaran?: string;
   kodeJenisPenghasilan?: number;
   kodeJenisPajak?: number;
-  pic?: string;
-  kodeWPBadan?: string;
+  picPencairanPenghasilan?: string;
+  kodeWajibPajakBadanUsaha?: string;
   penghasilanBruto?: number;
   kodeObjek?: string;
   tarifPajak?: number;
@@ -52,11 +52,11 @@ export const createPPh23 = async (input: CreatePph23Param) => {
   }
 
   const wajibPajakBadanUsaha = await prisma.wajibPajakBadanUsaha.findUnique({
-    where: { kodeWPBadan: requestBody.kodeWPBadan },
+    where: { kodeWajibPajakBadanUsaha: requestBody.kodeWajibPajakBadanUsaha },
   });
 
   if (!wajibPajakBadanUsaha) {
-    throw new BadRequestError('Kode WP Badan tidak ditemukan.');
+    throw new BadRequestError('Kode Wajib Pajak Badan Usaha tidak ditemukan.');
   }
 
   const objekPajak = await prisma.objekPajak.findUnique({
@@ -124,24 +124,45 @@ export const createPPh23 = async (input: CreatePph23Param) => {
 };
 
 export const getAllPPh23 = async (
-  data: GetPph23List
-  // page: number,
-  // limit: number
+  data: GetPph23List,
+  page: number,
+  limit: number
 ) => {
   const kegiatanPenghasilanBadanUsahaList = data;
 
-  // const take = limit;
-  // const skip = (page - 1) * limit;
-
-  return prisma.kegiatanPenghasilanBadan.findMany({
-    // skip: skip,
-    // take: take,
+  const take = limit;
+  const skip = (page - 1) * limit;
+  const totalCount = await prisma.kegiatanPenghasilanBadan.count({
     where: {
       ...kegiatanPenghasilanBadanUsahaList,
       kodeJenisPajak: 2,
       idl: data.idl,
     },
   });
+  const totalPage = Math.ceil(totalCount / limit);
+  const currentPage = page || 0;
+
+  const results = await prisma.kegiatanPenghasilanBadan.findMany({
+    where: {
+      ...kegiatanPenghasilanBadanUsahaList,
+      kodeJenisPajak: 2,
+      idl: data.idl,
+    },
+    orderBy: {
+      tanggalInput: 'desc',
+    },
+    skip,
+    take,
+  });
+
+  return {
+    results,
+    pagination: {
+      totalCount,
+      totalPage,
+      currentPage,
+    },
+  };
 };
 
 export const getPPh23ById = async (kodeKegiatanBadan: string) => {
@@ -156,109 +177,6 @@ export const getPPh23ById = async (kodeKegiatanBadan: string) => {
 
   return kegiatanPenghasilanBadanUsaha;
 };
-
-// export const updatePPh23 = async (
-//   kodeKegiatanBadan: string,
-//   updatedData: Partial<UpdatePph23Param>
-// ) => {
-//   const getPPh23ById = await prisma.kegiatanPenghasilanBadan.findFirst({
-//     where: { kodeKegiatanBadan },
-//   });
-
-//   if (!getPPh23ById) {
-//     throw new BadRequestError('Kode Kegiatan Badan tidak ditemukan.');
-//   }
-
-//   const PengajuanAnggaran = await prisma.PengajuanAnggaran.findUnique({
-//     where: { idKegiatanAnggaran: updatedData.idKegiatanAnggaran },
-//   });
-
-//   if (!PengajuanAnggaran) {
-//     throw new BadRequestError('ID Kegiatan Anggaran tidak ditemukan.');
-//   }
-
-//   const jenisPenghasilan = await prisma.jenisPenghasilan.findUnique({
-//     where: { kodeJenisPenghasilan: updatedData.kodeJenisPenghasilan },
-//   });
-
-//   if (!jenisPenghasilan) {
-//     throw new BadRequestError('Kode Jenis Penghasilan tidak ditemukan.');
-//   }
-
-//   const wajibPajakBadanUsaha = await prisma.wajibPajakBadanUsaha.findUnique({
-//     where: { kodeWPBadan: updatedData.kodeWPBadan },
-//   });
-
-//   if (!wajibPajakBadanUsaha) {
-//     throw new BadRequestError('Kode WP Badan tidak ditemukan.');
-//   }
-
-//   const objekPajak = await prisma.objekPajak.findUnique({
-//     where: { kodeObjek: updatedData.kodeObjek },
-//   });
-
-//   if (!objekPajak) {
-//     throw new BadRequestError('Kode Objek tidak ditemukan.');
-//   }
-
-//   const satuanKerja = await prisma.satuanKerja.findUnique({
-//     where: { idl: updatedData.idl },
-//   });
-
-//   if (!satuanKerja) {
-//     throw new BadRequestError('IDL tidak ditemukan.');
-//   }
-
-//   const wajibPajakBadanUsahaNPWP = wajibPajakBadanUsaha.npwp;
-//   const wajibPajakBadanUsahaNoRekening = wajibPajakBadanUsaha.noRekening;
-//   const wajibPajakBadanUsahaNamaRekening = wajibPajakBadanUsaha.namaRekening;
-//   const wajibPajakBadanUsahaBankTransfter = wajibPajakBadanUsaha.bankTransfer;
-//   const wajibPajakBadanUsahaNarahubung = wajibPajakBadanUsaha.namaNaraHubung;
-//   const wajibPajakBadanUsahaAdaSkbPPh23 = wajibPajakBadanUsaha.adaSkbPPh23;
-
-//   const tarifNpwp = objekPajak.tarifNpwp;
-//   const tarifNonNpwp = objekPajak.tarifNonNpwp;
-
-//   let tarifPajak;
-//   let potonganPajak;
-//   const penghasilanBruto = updatedData.penghasilanBruto || 0;
-
-//   if (wajibPajakBadanUsahaAdaSkbPPh23 === 'ya') {
-//     tarifPajak = 0;
-//     potonganPajak = 0;
-//   } else {
-//     if (
-//       wajibPajakBadanUsahaNPWP === '0000000000000000' ||
-//       wajibPajakBadanUsahaNPWP === 'BELUM ADA'
-//     ) {
-//       tarifPajak = tarifNonNpwp;
-//     } else {
-//       tarifPajak = tarifNpwp;
-//     }
-
-//     potonganPajak = (tarifPajak / 100) * penghasilanBruto;
-//   }
-
-//   const penghasilanDiterima = penghasilanBruto - potonganPajak;
-
-//   const updatedKegiatanBadanUsaha =
-//     await prisma.kegiatanPenghasilanBadan.update({
-//       where: { kodeKegiatanBadan },
-//       data: {
-//         ...updatedData,
-//         npwp: wajibPajakBadanUsahaNPWP,
-//         noRekening: wajibPajakBadanUsahaNoRekening,
-//         namaRekening: wajibPajakBadanUsahaNamaRekening,
-//         bankTransfer: wajibPajakBadanUsahaBankTransfter,
-//         narahubung: wajibPajakBadanUsahaNarahubung,
-//         tarifPajak: tarifPajak,
-//         potonganPajak: potonganPajak,
-//         penghasilanDiterima: penghasilanDiterima,
-//       },
-//     });
-
-//   return updatedKegiatanBadanUsaha;
-// };
 
 export const updatePPh23 = async (
   kodeKegiatanBadan: string,
@@ -294,7 +212,7 @@ export const updatePPh23 = async (
   }
 
   const wajibPajakBadanUsaha = await prisma.wajibPajakBadanUsaha.findUnique({
-    where: { kodeWPBadan: updatedData.kodeWPBadan },
+    where: { kodeWajibPajakBadanUsaha: updatedData.kodeWajibPajakBadanUsaha },
   });
 
   if (!wajibPajakBadanUsaha) {
@@ -346,9 +264,9 @@ export const updatePPh23 = async (
       data: {
         uraianKegiatan: updatedData.uraianKegiatan,
         idKegiatanAnggaran: updatedData.idKegiatanAnggaran,
-        kodeWPBadan: updatedData.kodeWPBadan,
+        kodeWajibPajakBadanUsaha: updatedData.kodeWajibPajakBadanUsaha,
         kodeObjek: updatedData.kodeObjek,
-        pic: updatedData.pic,
+        picPencairanPenghasilan: updatedData.picPencairanPenghasilan,
         kodeJenisPenghasilan: kodeJenisPenghasilan,
         penghasilanBruto: penghasilanBruto,
         invoice: invoiceFile,
@@ -427,7 +345,7 @@ export const createPPh4Ayat2 = async (input: CreatePph4Param) => {
   }
 
   const wajibPajakBadanUsaha = await prisma.wajibPajakBadanUsaha.findUnique({
-    where: { kodeWPBadan: requestBody.kodeWPBadan },
+    where: { kodeWajibPajakBadanUsaha: requestBody.kodeWajibPajakBadanUsaha },
   });
 
   if (!wajibPajakBadanUsaha) {
@@ -493,15 +411,46 @@ export const createPPh4Ayat2 = async (input: CreatePph4Param) => {
   return craetePPh4;
 };
 
-export const getAllPPh4Ayat2 = async (data: GetPph4List) => {
+export const getAllPPh4Ayat2 = async (
+  data: GetPph4List,
+  page: number,
+  limit: number
+) => {
   const kegiatanPenghasilanBadanUsahaList = data;
 
-  return prisma.kegiatanPenghasilanBadan.findMany({
+  const take = limit;
+  const skip = (page - 1) * limit;
+  const totalCount = await prisma.kegiatanPenghasilanBadan.count({
     where: {
       ...kegiatanPenghasilanBadanUsahaList,
       kodeJenisPajak: 3,
+      idl: data.idl,
     },
   });
+  const totalPage = Math.ceil(totalCount / limit);
+  const currentPage = page || 0;
+
+  const results = await prisma.kegiatanPenghasilanBadan.findMany({
+    where: {
+      ...kegiatanPenghasilanBadanUsahaList,
+      kodeJenisPajak: 3,
+      idl: data.idl,
+    },
+    orderBy: {
+      tanggalInput: 'desc',
+    },
+    skip,
+    take,
+  });
+
+  return {
+    results,
+    pagination: {
+      totalCount,
+      totalPage,
+      currentPage,
+    },
+  };
 };
 
 export const getPPh4Ayat2ById = async (kodeKegiatanBadan: string) => {
@@ -552,7 +501,7 @@ export const updatePPh4Ayat2 = async (
     }
 
     const wajibPajakBadanUsaha = await prisma.wajibPajakBadanUsaha.findUnique({
-      where: { kodeWPBadan: updatedData.kodeWPBadan },
+      where: { kodeWajibPajakBadanUsaha: updatedData.kodeWajibPajakBadanUsaha },
     });
 
     if (!wajibPajakBadanUsaha) {
@@ -597,9 +546,9 @@ export const updatePPh4Ayat2 = async (
         data: {
           uraianKegiatan: updatedData.uraianKegiatan,
           idKegiatanAnggaran: updatedData.idKegiatanAnggaran,
-          kodeWPBadan: updatedData.kodeWPBadan,
+          kodeWajibPajakBadanUsaha: updatedData.kodeWajibPajakBadanUsaha,
           kodeObjek: updatedData.kodeObjek,
-          pic: updatedData.pic,
+          picPencairanPenghasilan: updatedData.picPencairanPenghasilan,
           kodeJenisPenghasilan: kodeJenisPenghasilan,
           penghasilanBruto: penghasilanBruto,
           invoice: invoiceFile,

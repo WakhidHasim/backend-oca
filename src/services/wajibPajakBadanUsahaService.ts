@@ -2,7 +2,6 @@ import { prisma } from '../config/database';
 import BadRequestError from '../error/BadRequestError';
 
 import { WajibPajakBadanUsaha } from '../entities/wajibPajakBadanUsaha';
-import { createWajibPajakBadanUsahaSchema } from '../validation/wajibPajakBadanUsahaSchema';
 
 type CreateWPBUParam = WajibPajakBadanUsaha;
 type UpdateWPBUParam = WajibPajakBadanUsaha;
@@ -28,21 +27,16 @@ type GetWajibPajakBadanUsahaParam = {
   statusPkp?: string;
 };
 
-export const createWPBU = async (data: CreateWPBUParam) => {
-  try {
-    const requestBody = createWajibPajakBadanUsahaSchema.parse(data);
+export const createWPBU = async (input: CreateWPBUParam) => {
+  const requestBody = input;
 
-    const craeteWPBU = await prisma.wajibPajakBadanUsaha.create({
-      data: {
-        ...requestBody,
-      },
-    });
+  const craeteWPBU = await prisma.wajibPajakBadanUsaha.create({
+    data: {
+      ...requestBody,
+    },
+  });
 
-    return craeteWPBU;
-  } catch (error) {
-    console.error('Error creating Wajib Pajak Badan Usaha:', error);
-    throw error;
-  }
+  return craeteWPBU;
 };
 
 export const getAllWPBU = async (data: GetWajibPajakBadanUsahaParam) => {
@@ -56,23 +50,15 @@ export const getAllWPBU = async (data: GetWajibPajakBadanUsahaParam) => {
 };
 
 export const getWPBUById = async (kodeWPBadan: string) => {
-  try {
-    const wpbu = await prisma.wajibPajakBadanUsaha.findUnique({
-      where: { kodeWPBadan },
-    });
+  const wpbu = await prisma.wajibPajakBadanUsaha.findUnique({
+    where: { kodeWPBadan },
+  });
 
-    if (!wpbu) {
-      throw new BadRequestError('Kegiatan Penghasilan Badan tidak ditemukan');
-    }
-
-    return wpbu;
-  } catch (error) {
-    console.error(
-      'Error getting Kegiatan Penghasilan Badan Usaha by ID:',
-      error
-    );
-    throw error;
+  if (!wpbu) {
+    throw new BadRequestError('Kegiatan Penghasilan Badan tidak ditemukan');
   }
+
+  return wpbu;
 };
 
 export const updateWPBU = async (
