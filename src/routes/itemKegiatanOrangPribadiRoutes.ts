@@ -4,15 +4,12 @@ import * as itemKegiatanPenghasilanOrangPribadiController from '../controllers/i
 
 const router = express.Router();
 
-router.post(
-  '/',
-  itemKegiatanPenghasilanOrangPribadiController.createKegiatanPenghasilanOP
-);
+router.post('/', itemKegiatanPenghasilanOrangPribadiController.createPPh21);
 
 router.get('/', itemKegiatanPenghasilanOrangPribadiController.getAllPPh21);
 
 router.delete(
-  '/:id',
+  '/:KodeItemKegiatanOP',
   itemKegiatanPenghasilanOrangPribadiController.deletePPh21
 );
 

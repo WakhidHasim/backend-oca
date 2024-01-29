@@ -2,7 +2,6 @@ import { prisma } from '../config/database';
 import BadRequestError from '../error/BadRequestError';
 
 import { InventarisasiPajak } from '../entities/inventarisasiPajak';
-import { createInventarisasiPajakSchema } from '../validation/inventarisasiPajakSchema';
 
 type CreateInventarisasiPajakParam = InventarisasiPajak;
 type UpdateInventarisasiPajakParam = InventarisasiPajak;
@@ -23,7 +22,7 @@ type GetInventarisasiPajakList = {
 export const createInventarisasiPajak = async (
   input: CreateInventarisasiPajakParam
 ) => {
-  const requestBody = createInventarisasiPajakSchema.parse(input);
+  const requestBody = input;
 
   const pengajuanAnggaran = await prisma.PengajuanAnggaran.findUnique({
     where: { idKegiatanAnggaran: requestBody.idKegiatanAnggaran },

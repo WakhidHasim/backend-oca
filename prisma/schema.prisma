@@ -234,24 +234,24 @@ model KegiatanPenghasilanOP {
 }
 
 model ItemKegiatanPenghasilanOP {
-  KodeItemKegiatanOP  String   @id @default(uuid()) @map("kode_item_kegiatan_op")
-  kodeKegiatanOP      String   @map("kode_kegiatan_op") @db.VarChar(50)
-  kodeWPOP            String   @map("kode_wpop") @db.VarChar(50)
-  statusPegawai       String   @map("status_pegawai") @db.VarChar(30)
-  npwp                String?  @db.VarChar(30)
-  lapisan             Int?
-  bankTransfer        String?  @map("bank_transfer") @db.VarChar(50)
-  noRekening          String?  @map("no_rekening") @db.VarChar(30)
-  namaRekening        String?  @map("nama_rekening") @db.VarChar(100)
-  penghasilanBruto    Int      @map("penghasilan_bruto") @db.Integer
-  kodeObjek           String   @map("kode_objek") @db.VarChar(20)
-  tarifBerlaku        Float    @map("tarif_berlaku")
-  potonganPajak       Int      @map("potongan_pajak") @db.Integer
-  penghasilanDiterima Int      @map("penghasilan_diterima") @db.Integer
-  metodePotong        String   @map("metode_potong") @db.VarChar(50)
-  fileBuktiPotong     String?  @map("file_bukti_potong") @db.VarChar(255)
-  status              String   @db.VarChar(50)
-  tanggalInput        DateTime @map("tanggal_input") @db.Timestamptz()
+  KodeItemKegiatanOP         String   @id @default(uuid()) @map("kode_item_kegiatan_op")
+  kodeKegiatanOP             String   @map("kode_kegiatan_op") @db.VarChar(50)
+  kodeWajibPajakOrangPribadi String   @map("kode_wajib_pajak_badan_usaha") @db.VarChar(50)
+  statusPegawai              String   @map("status_pegawai") @db.VarChar(30)
+  npwp                       String?  @db.VarChar(30)
+  lapisan                    Int?
+  bankTransfer               String?  @map("bank_transfer") @db.VarChar(50)
+  noRekening                 String?  @map("no_rekening") @db.VarChar(30)
+  namaRekening               String?  @map("nama_rekening") @db.VarChar(100)
+  penghasilanBruto           Int      @map("penghasilan_bruto") @db.Integer
+  kodeObjek                  String   @map("kode_objek") @db.VarChar(20)
+  tarifBerlaku               Float    @map("tarif_berlaku")
+  potonganPajak              Int      @map("potongan_pajak") @db.Integer
+  penghasilanDiterima        Int      @map("penghasilan_diterima") @db.Integer
+  metodePotong               String   @map("metode_potong") @db.VarChar(50)
+  fileBuktiPotong            String?  @map("file_bukti_potong") @db.VarChar(255)
+  status                     String   @db.VarChar(50)
+  tanggalInput               DateTime @map("tanggal_input") @db.Timestamptz()
 
   @@map("item_kegiatan_penghasilan_op")
 }

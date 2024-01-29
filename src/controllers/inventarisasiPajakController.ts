@@ -246,8 +246,8 @@ export const updateInventarisasiPajak = async (req: Request, res: Response) => {
         FileBuktiName = files['fileBukti'][0].filename;
 
         const filePath = path.join(
-          'public/kegiatan_penghasilan_badan/pph23/invoice',
-          getInventarisasiPajakId.invoice
+          'public/inventarisasi_pajak/',
+          getInventarisasiPajakId.fileBukti
         );
         fs.unlinkSync(filePath);
       }

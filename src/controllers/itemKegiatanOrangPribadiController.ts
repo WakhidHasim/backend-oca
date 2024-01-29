@@ -1,24 +1,44 @@
 import { Request, Response } from 'express';
 import BadRequestError from '../error/BadRequestError';
-
+import moment from 'moment-timezone';
 import * as itemKegiatanPenghasilanOrangPribadi from '../services/itemKegiatanOrangPribadiService';
+import { createItemKegiatanPenghasilanOrangPribadiSchema } from '../validation/itemKegitanPenghasilanOrangPribadi';
+import { ItemKegiatanPenghasilanOrangPribadi } from '../entities/itemKegiatanPenghasilanOrangPribadi';
 
-export const createKegiatanPenghasilanOP = async (
-  req: Request,
-  res: Response
-) => {
+export const createPPh21 = async (req: Request, res: Response) => {
   try {
-    const createPPh21 = await itemKegiatanPenghasilanOrangPribadi.createPPh21({
-      ...req.body,
-    });
+    const validationResult =
+      createItemKegiatanPenghasilanOrangPribadiSchema.safeParse(req.body);
 
-    res.json({
-      status: {
-        code: 200,
-        description: 'Ok',
-      },
-      result: createPPh21,
-    });
+    if (validationResult.success) {
+      const body = validationResult.data;
+
+      const completeRequest: ItemKegiatanPenghasilanOrangPribadi = {
+        ...body,
+        tanggalInput: moment().tz('Asia/Jakarta').format(),
+        status: 'Entry',
+      };
+
+      const createPPh21 = await itemKegiatanPenghasilanOrangPribadi.createPPh21(
+        completeRequest
+      );
+
+      res.json({
+        status: {
+          code: 200,
+          description: 'Ok',
+        },
+        result: createPPh21,
+      });
+    } else {
+      res.status(400).json({
+        status: {
+          code: 400,
+          description: 'Bad Request',
+        },
+        result: validationResult.error.errors,
+      });
+    }
   } catch (error) {
     if (error instanceof BadRequestError) {
       res.status(400).json({
@@ -34,17 +54,24 @@ export const createKegiatanPenghasilanOP = async (
 
 export const getAllPPh21 = async (req: Request, res: Response) => {
   try {
-    const queryParameters = req.query;
+    const { page, limit } = req.query;
+    const pageNumber = parseInt(page as string) || 1;
+    const limitNumber = parseInt(limit as string) || 10;
 
-    const getAllPPh21 = await itemKegiatanPenghasilanOrangPribadi.getAllPPh21(
-      queryParameters
-    );
+    const { results, pagination } =
+      await itemKegiatanPenghasilanOrangPribadi.getAllPPh21(
+        {},
+        pageNumber,
+        limitNumber
+      );
+
     res.json({
       status: {
         code: 200,
         description: 'OK',
       },
-      result: getAllPPh21,
+      result: results,
+      pagination,
     });
   } catch (error) {
     if (error instanceof BadRequestError) {
@@ -67,9 +94,9 @@ export const getAllPPh21 = async (req: Request, res: Response) => {
 
 export const deletePPh21 = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const { KodeItemKegiatanOP } = req.params;
 
-    await itemKegiatanPenghasilanOrangPribadi.deletePPh21(id);
+    await itemKegiatanPenghasilanOrangPribadi.deletePPh21(KodeItemKegiatanOP);
 
     res.json({
       status: {
