@@ -1,6 +1,81 @@
-import { Request, Response, NextFunction, Express } from 'express';
+import { Request, Response } from 'express';
 
 import * as dashboardService from '../services/dashboardService';
+
+export const countPph21Entry = async (req: Request, res: Response) => {
+  try {
+    const queryParameters = req.query;
+
+    const countPPh21Entry = await dashboardService.countPph21Entry(
+      queryParameters
+    );
+    res.json({
+      status: {
+        code: 200,
+        description: 'OK',
+      },
+      result: countPPh21Entry,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      status: {
+        code: 500,
+        description: 'Internal Server Error',
+      },
+      result: 'Internal Server Error',
+    });
+  }
+};
+
+export const countPph21Verifikasi = async (req: Request, res: Response) => {
+  try {
+    const queryParameters = req.query;
+
+    const countPph21Verifikasi = await dashboardService.countPph21Verifikasi(
+      queryParameters
+    );
+    res.json({
+      status: {
+        code: 200,
+        description: 'OK',
+      },
+      result: countPph21Verifikasi,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      status: {
+        code: 500,
+        description: 'Internal Server Error',
+      },
+      result: 'Internal Server Error',
+    });
+  }
+};
+
+export const countPph21Setor = async (req: Request, res: Response) => {
+  try {
+    const queryParameters = req.query;
+
+    const countPph21Setor = await dashboardService.countPph21Setor(
+      queryParameters
+    );
+    res.json({
+      status: {
+        code: 200,
+        description: 'OK',
+      },
+      result: countPph21Setor,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      status: {
+        code: 500,
+        description: 'Internal Server Error',
+      },
+      result: 'Internal Server Error',
+    });
+  }
+};
 
 export const countPph23Entry = async (req: Request, res: Response) => {
   try {

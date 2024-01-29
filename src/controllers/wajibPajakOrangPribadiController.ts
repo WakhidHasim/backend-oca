@@ -2,10 +2,11 @@ import { Request, Response, NextFunction, Express } from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-
+import moment from 'moment-timezone';
 import BadRequestError from '../error/BadRequestError';
-
+import { createWajibPajakOrangPribadiSchema } from '../validation/wajibPajakOrangPribadiSchema';
 import * as wajibPajakOrangPribadiService from '../services/wajibPajakOrangPribadiService';
+import { WajibPajakOrangPribadi } from '../entities/wajibPajakOrangPribadi';
 
 const storageFile = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -112,9 +113,9 @@ const handleFileUploadErrors = (
 };
 
 export const createWPOP = async (req: Request, res: Response) => {
-  try {
-    uploadFieldsWPOP(req, res, async (err) => {
-      handleFileUploadErrors(err, req, res, async () => {
+  uploadFieldsWPOP(req, res, async (err) => {
+    handleFileUploadErrors(err, req, res, async () => {
+      try {
         const files = req.files as {
           [fieldname: string]: Express.Multer.File[];
         };
@@ -123,38 +124,77 @@ export const createWPOP = async (req: Request, res: Response) => {
         const fileFotoIdOrangPribadi = files['fileFotoIdOrangPribadi']?.[0];
         const fileFotoBuktiRekening = files['fileFotoBuktiRekening']?.[0];
 
-        const createWPOP = await wajibPajakOrangPribadiService.createWPOP({
+        const formattedDate = moment()
+          .tz('Asia/Jakarta')
+          .format('YYYY-MM-DDTHH:mm:ss');
+
+        const body: WajibPajakOrangPribadi = {
           ...req.body,
+          tanggalInput: formattedDate + '+07:00',
+          isApproved: true,
           fileFotoNpwp: fileFotoNpwp?.filename,
           fileFotoIdOrangPribadi: fileFotoIdOrangPribadi?.filename,
           fileFotoBuktiRekening: fileFotoBuktiRekening?.filename,
-        });
+        };
 
-        res.json({
-          status: {
-            code: 200,
-            description: 'Ok',
-          },
-          result: createWPOP,
-        });
-      });
+        const validationResult =
+          createWajibPajakOrangPribadiSchema.safeParse(body);
+
+        if (validationResult.success) {
+          const result = validationResult.data;
+
+          const requestBody: WajibPajakOrangPribadi = {
+            ...result,
+            tanggalInput: body.tanggalInput,
+            isApproved: body.isApproved,
+            fileFotoNpwp: body.fileFotoNpwp,
+            fileFotoIdOrangPribadi: body.fileFotoIdOrangPribadi,
+            fileFotoBuktiRekening: body.fileFotoBuktiRekening,
+          };
+
+          const createWPOP = await wajibPajakOrangPribadiService.createWPOP(
+            requestBody
+          );
+
+          res.json({
+            status: {
+              code: 200,
+              description: 'Ok',
+            },
+            result: { ...createWPOP, tanggalInput: formattedDate + '+07:00' },
+          });
+        } else {
+          res.status(400).json({
+            status: {
+              code: 400,
+              description: 'Bad Request',
+            },
+            result: validationResult.error.errors,
+          });
+        }
+      } catch (error: any) {
+        if (error instanceof BadRequestError) {
+          res.status(400).json({
+            status: {
+              code: 400,
+              description: 'Bad Request',
+            },
+            result: error.message,
+          });
+          return;
+        } else {
+          console.log('error message:', error.message);
+          res.status(500).json({
+            status: {
+              code: 500,
+              description: 'Internal Server Error',
+            },
+            result: 'Internal Server Error',
+          });
+        }
+      }
     });
-  } catch (error) {
-    if (error instanceof BadRequestError) {
-      res.status(400).json({
-        status: {
-          code: 400,
-          description: 'Bad Request',
-        },
-        result: error.message,
-      });
-      return;
-    }
-
-    console.log(error);
-
-    return res.status(500).json({ message: 'internal server error' });
-  }
+  });
 };
 
 export const wpopList = async (req: Request, res: Response) => {
@@ -171,7 +211,7 @@ export const wpopList = async (req: Request, res: Response) => {
       result: wpop,
     });
   } catch (error: any) {
-    console.log(error.message);
+    console.log('OK');
     res.status(500).json({
       status: {
         code: 500,
@@ -179,5 +219,37 @@ export const wpopList = async (req: Request, res: Response) => {
       },
       result: null,
     });
+  }
+};
+
+export const getWPOPyId = async (req: Request, res: Response) => {
+  try {
+    const { kodeWajibPajakOrangPribadi } = req.params;
+    const wpop = await wajibPajakOrangPribadiService.getWPOPById(
+      kodeWajibPajakOrangPribadi
+    );
+
+    res.json({
+      status: {
+        code: 200,
+        description: 'OK',
+      },
+      result: wpop,
+    });
+  } catch (error) {
+    if (error instanceof BadRequestError) {
+      res.status(400).json({
+        status: {
+          code: 400,
+          description: 'Bad Request',
+        },
+        result: error.message,
+      });
+      return;
+    }
+
+    console.log(error);
+
+    return res.status(500).json({ message: 'internal server error' });
   }
 };

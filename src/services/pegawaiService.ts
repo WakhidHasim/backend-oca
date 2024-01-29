@@ -20,12 +20,36 @@ type GetPegawaiParam = {
   satker?: string;
 };
 
-export const getPegawaiList = async (data: GetPegawaiParam) => {
+export const getPegawaiList = async (
+  data: GetPegawaiParam,
+  page: number,
+  limit: number
+) => {
   const pegawai = data;
-
-  return prisma.pegawai.findMany({
+  const take = limit;
+  const skip = (page - 1) * limit;
+  const totalCount = await prisma.pegawai.count({
     where: {
       ...pegawai,
     },
   });
+  const totalPage = Math.ceil(totalCount / limit);
+  const currentPage = page || 0;
+
+  const results = await prisma.pegawai.findMany({
+    where: {
+      ...pegawai,
+    },
+    skip,
+    take,
+  });
+
+  return {
+    results,
+    pagination: {
+      totalCount,
+      totalPage,
+      currentPage,
+    },
+  };
 };

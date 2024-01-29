@@ -215,16 +215,20 @@ export const createWPBU = async (
 
 export const wpbuList = async (req: Request, res: Response) => {
   try {
-    const queryParameters = req.query;
-    const wpbuList = await wajibPajakBadanUsahaService.getAllWPBU(
-      queryParameters
-    );
+    const { page, limit } = req.query;
+    const pageNumber = parseInt(page as string) || 1;
+    const limitNumber = parseInt(limit as string) || 10;
+
+    const { results, pagination } =
+      await wajibPajakBadanUsahaService.getAllWPBU({}, pageNumber, limitNumber);
+
     res.json({
       status: {
         code: 200,
         description: 'OK',
       },
-      result: wpbuList,
+      result: results,
+      pagination,
     });
   } catch (error: any) {
     console.log(error.message);
@@ -240,8 +244,10 @@ export const wpbuList = async (req: Request, res: Response) => {
 
 export const getWPBUyId = async (req: Request, res: Response) => {
   try {
-    const { kodeWPBadan } = req.params;
-    const wpbu = await wajibPajakBadanUsahaService.getWPBUById(kodeWPBadan);
+    const { kodeWajibPajakBadanUsaha } = req.params;
+    const wpbu = await wajibPajakBadanUsahaService.getWPBUById(
+      kodeWajibPajakBadanUsaha
+    );
 
     res.json({
       status: {
@@ -270,9 +276,11 @@ export const getWPBUyId = async (req: Request, res: Response) => {
 
 export const updateWPBU = async (req: Request, res: Response) => {
   try {
-    const { kodeWPBadan } = req.params;
+    const { kodeWajibPajakBadanUsaha } = req.params;
 
-    const wpbu = await wajibPajakBadanUsahaService.getWPBUById(kodeWPBadan);
+    const wpbu = await wajibPajakBadanUsahaService.getWPBUById(
+      kodeWajibPajakBadanUsaha
+    );
 
     if (!wpbu || !wpbu.fileFotoIdentitasBadan) {
       return res.status(404).json({
@@ -338,7 +346,7 @@ export const updateWPBU = async (req: Request, res: Response) => {
       }
 
       const updatedKegiatanOP = await wajibPajakBadanUsahaService.updateWPBU(
-        kodeWPBadan,
+        kodeWajibPajakBadanUsaha,
         body,
         fileFotoIdentitasBadan,
         fileFotoBuktiRekening,
@@ -374,11 +382,13 @@ export const updateWPBU = async (req: Request, res: Response) => {
 
 export const deleteWPBU = async (req: Request, res: Response) => {
   try {
-    const { kodeWPBadan } = req.params;
+    const { kodeWajibPajakBadanUsaha } = req.params;
 
-    const wpbu = await wajibPajakBadanUsahaService.getWPBUById(kodeWPBadan);
+    const wpbu = await wajibPajakBadanUsahaService.getWPBUById(
+      kodeWajibPajakBadanUsaha
+    );
 
-    await wajibPajakBadanUsahaService.deleteWPBU(kodeWPBadan);
+    await wajibPajakBadanUsahaService.deleteWPBU(kodeWajibPajakBadanUsaha);
 
     if (wpbu && wpbu.fileFotoIdentitasBadan) {
       const filePath = path.join(

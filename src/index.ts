@@ -11,7 +11,6 @@ import bankRoutes from './routes/bankRoutes';
 import negaraRoutes from './routes/negaraRoutes';
 import objekPajakRoutes from './routes/objekPajakRoutes';
 import pegawaiRoutes from './routes/pegawaiRoutes';
-import wpopRoutes from './routes/wpopRoutes';
 import pengajuanAnggaranRoutes from './routes/pengajuanAnggaranRoutes';
 import jenisPenghasilanRoutes from './routes/jenisPenghasilanRoutes';
 import wajibPajakBadanUsahaRoutes from './routes/wajibPajakBadanUsahaRoutes';
@@ -58,7 +57,6 @@ app.use('/api/negara', negaraRoutes);
 app.use('/api/jenis-penghasilan', jenisPenghasilanRoutes);
 app.use('/api/objek-pajak', objekPajakRoutes);
 app.use('/api/pegawai', pegawaiRoutes);
-app.use('/api/wpop', wpopRoutes);
 app.use(
   '/api/pengajuan-anggaran',
 

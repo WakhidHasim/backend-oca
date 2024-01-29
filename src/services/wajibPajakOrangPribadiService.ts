@@ -1,12 +1,12 @@
 import { prisma } from '../config/database';
+import BadRequestError from '../error/BadRequestError';
 
 import { WajibPajakOrangPribadi } from '../entities/wajibPajakOrangPribadi';
-import { createWajibPajakOrangPribadiValidation } from '../validation/wajibPajakOrangPribadiValidation';
 
 type CreateWPOPParams = WajibPajakOrangPribadi;
 
-type GetWajibPajakOrangPribadiParam = {
-  kodeWPOP?: string;
+type GetWPOPParam = {
+  kodeWajibPajakOrangPribadi?: string;
   nama?: string;
   email?: string;
   kewarganegaraan?: string;
@@ -28,25 +28,19 @@ type GetWajibPajakOrangPribadiParam = {
   isApproved?: boolean;
 };
 
-export const createWPOP = async (data: CreateWPOPParams) => {
-  try {
-    const requestBody = createWajibPajakOrangPribadiValidation.parse(data);
+export const createWPOP = async (input: CreateWPOPParams) => {
+  const requestBody = input;
 
-    const craeteWPOP = await prisma.wajibPajakOrangPribadi.create({
-      data: {
-        ...requestBody,
-        isApproved: true,
-      },
-    });
+  const craeteWPOP = await prisma.wajibPajakOrangPribadi.create({
+    data: {
+      ...requestBody,
+    },
+  });
 
-    return craeteWPOP;
-  } catch (error) {
-    console.error('Error creating Wajib Pajak Orang Pribadi:', error);
-    throw error;
-  }
+  return craeteWPOP;
 };
 
-export const getWPOPList = async (data: GetWajibPajakOrangPribadiParam) => {
+export const getWPOPList = async (data: GetWPOPParam) => {
   const wpop = data;
 
   return prisma.wajibPajakOrangPribadi.findMany({
@@ -54,4 +48,18 @@ export const getWPOPList = async (data: GetWajibPajakOrangPribadiParam) => {
       ...wpop,
     },
   });
+};
+
+export const getWPOPById = async (kodeWajibPajakOrangPribadi: string) => {
+  const wpop = await prisma.wajibPajakOrangPribadi.findUnique({
+    where: { kodeWajibPajakOrangPribadi },
+  });
+
+  if (!wpop) {
+    throw new BadRequestError(
+      'Kegiatan Wajib Pajak Orang Pribadi tidak ditemukan'
+    );
+  }
+
+  return wpop;
 };

@@ -39,30 +39,56 @@ export const createWPBU = async (input: CreateWPBUParam) => {
   return craeteWPBU;
 };
 
-export const getAllWPBU = async (data: GetWajibPajakBadanUsahaParam) => {
+export const getAllWPBU = async (
+  data: GetWajibPajakBadanUsahaParam,
+  page: number,
+  limit: number
+) => {
   const wpbuList = data;
 
-  return prisma.wajibPajakBadanUsaha.findMany({
+  const take = limit;
+  const skip = (page - 1) * limit;
+  const totalCount = await prisma.wajibPajakBadanUsaha.count();
+  const totalPage = Math.ceil(totalCount / limit);
+  const currentPage = page || 0;
+
+  const results = await prisma.wajibPajakBadanUsaha.findMany({
     where: {
       ...wpbuList,
     },
+    orderBy: {
+      tanggalInput: 'desc',
+    },
+    skip,
+    take,
   });
+
+  return {
+    results,
+    pagination: {
+      totalCount,
+      totalPage,
+      currentPage,
+    },
+  };
 };
 
-export const getWPBUById = async (kodeWPBadan: string) => {
+export const getWPBUById = async (kodeWajibPajakBadanUsaha: string) => {
   const wpbu = await prisma.wajibPajakBadanUsaha.findUnique({
-    where: { kodeWPBadan },
+    where: { kodeWajibPajakBadanUsaha },
   });
 
   if (!wpbu) {
-    throw new BadRequestError('Kegiatan Penghasilan Badan tidak ditemukan');
+    throw new BadRequestError(
+      'Kegiatan Wajib Pajak Badan Usaha tidak ditemukan'
+    );
   }
 
   return wpbu;
 };
 
 export const updateWPBU = async (
-  kodeWPBadan: string,
+  kodeWajibPajakBadanUsaha: string,
   updatedData: Partial<UpdateWPBUParam>,
   fileFotoIdentitasBadan: string,
   fileFotoBuktiRekening: string,
@@ -71,7 +97,7 @@ export const updateWPBU = async (
 ) => {
   try {
     const wpbu = await prisma.wajibPajakBadanUsaha.findFirst({
-      where: { kodeWPBadan },
+      where: { kodeWajibPajakBadanUsaha },
     });
 
     if (!wpbu) {
@@ -79,7 +105,7 @@ export const updateWPBU = async (
     }
 
     const updatedKegiatanBadanUsaha = await prisma.wajibPajakBadanUsaha.update({
-      where: { kodeWPBadan },
+      where: { kodeWajibPajakBadanUsaha },
       data: {
         namaBadan: updatedData.namaBadan,
         email: updatedData.email,
@@ -108,10 +134,10 @@ export const updateWPBU = async (
   }
 };
 
-export const deleteWPBU = async (kodeWPBadan: string) => {
+export const deleteWPBU = async (kodeWajibPajakBadanUsaha: string) => {
   try {
     const deletedWPBU = await prisma.wajibPajakBadanUsaha.delete({
-      where: { kodeWPBadan },
+      where: { kodeWajibPajakBadanUsaha },
     });
 
     return deletedWPBU;

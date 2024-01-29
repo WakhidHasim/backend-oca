@@ -21,48 +21,65 @@ type GetInventarisasiPajakList = {
 };
 
 export const createInventarisasiPajak = async (
-  data: CreateInventarisasiPajakParam
+  input: CreateInventarisasiPajakParam
 ) => {
-  try {
-    const requestBody = createInventarisasiPajakSchema.parse(data);
+  const requestBody = createInventarisasiPajakSchema.parse(input);
 
-    const pengajuanAnggaran = await prisma.PengajuanAnggaran.findUnique({
-      where: { idKegiatanAnggaran: requestBody.idKegiatanAnggaran },
-    });
+  const pengajuanAnggaran = await prisma.PengajuanAnggaran.findUnique({
+    where: { idKegiatanAnggaran: requestBody.idKegiatanAnggaran },
+  });
 
-    if (!pengajuanAnggaran) {
-      throw new BadRequestError('ID Kegiatan Anggaran tidak ditemukan.');
-    }
-
-    const objekPajak = await prisma.objekPajak.findUnique({
-      where: { kodeObjek: requestBody.kodeObjek },
-    });
-
-    if (!objekPajak) {
-      throw new BadRequestError('Kode Objek tidak ditemukan.');
-    }
-
-    const createdInventarisasiPajak = await prisma.inventarisasiPajak.create({
-      data: requestBody,
-    });
-
-    return createdInventarisasiPajak;
-  } catch (error) {
-    console.error('Error creating Inventarisasi Pajak:', error);
-    throw error;
+  if (!pengajuanAnggaran) {
+    throw new BadRequestError('ID Kegiatan Anggaran tidak ditemukan.');
   }
+
+  const objekPajak = await prisma.objekPajak.findUnique({
+    where: { kodeObjek: requestBody.kodeObjek },
+  });
+
+  if (!objekPajak) {
+    throw new BadRequestError('Kode Objek tidak ditemukan.');
+  }
+
+  const createdInventarisasiPajak = await prisma.inventarisasiPajak.create({
+    data: requestBody,
+  });
+
+  return createdInventarisasiPajak;
 };
 
 export const getAllInventarisasiPajak = async (
-  data: GetInventarisasiPajakList
+  data: GetInventarisasiPajakList,
+  page: number,
+  limit: number
 ) => {
   const inventarisasiPajakList = data;
 
-  return prisma.inventarisasiPajak.findMany({
+  const take = limit;
+  const skip = (page - 1) * limit;
+  const totalCount = await prisma.inventarisasiPajak.count({
+    where: {
+      ...inventarisasiPajakList,
+      idl: data.idl,
+    },
+  });
+  const totalPage = Math.ceil(totalCount / limit);
+  const currentPage = page || 0;
+
+  const results = await prisma.inventarisasiPajak.findMany({
     where: {
       ...inventarisasiPajakList,
     },
   });
+
+  return {
+    results,
+    pagination: {
+      totalCount,
+      totalPage,
+      currentPage,
+    },
+  };
 };
 
 export const getInventarisasiPajakById = async (

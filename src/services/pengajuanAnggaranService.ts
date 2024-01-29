@@ -9,18 +9,42 @@ type GetPengajuanAnggaranParam = {
   jumlahPengajuan?: number;
   metodePengajuan?: string;
   statusPengajuan?: string;
-  tanggalPengajuan?: Date;
+  tanggalPengajuan?: string;
 };
 
 export const getPengajuanAnggaranList = async (
-  data: GetPengajuanAnggaranParam
+  data: GetPengajuanAnggaranParam,
+  page: number,
+  limit: number
 ) => {
   const pengajuanAnggaranList = data;
 
-  return prisma.pengajuanAnggaran.findMany({
+  const take = limit;
+  const skip = (page - 1) * limit;
+  const totalCount = await prisma.pengajuanAnggaran.count({
     where: {
       ...pengajuanAnggaranList,
-      idl: '211.03',
+      idl: data.idl,
     },
   });
+  const totalPage = Math.ceil(totalCount / limit);
+  const currentPage = page || 0;
+
+  const results = await prisma.pengajuanAnggaran.findMany({
+    where: {
+      ...pengajuanAnggaranList,
+      idl: data.idl,
+    },
+    skip,
+    take,
+  });
+
+  return {
+    results,
+    pagination: {
+      totalCount,
+      totalPage,
+      currentPage,
+    },
+  };
 };

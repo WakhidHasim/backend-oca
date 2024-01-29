@@ -8,10 +8,19 @@ router.post('/', wajibPajakBadanUsahaController.createWPBU);
 
 router.get('/', wajibPajakBadanUsahaController.wpbuList);
 
-router.get('/:kodeWPBadan', wajibPajakBadanUsahaController.getWPBUyId);
+router.get(
+  '/:kodeWajibPajakBadanUsaha',
+  wajibPajakBadanUsahaController.getWPBUyId
+);
 
-router.put('/:kodeWPBadan', wajibPajakBadanUsahaController.updateWPBU);
+router.put(
+  '/:kodeWajibPajakBadanUsaha',
+  wajibPajakBadanUsahaController.updateWPBU
+);
 
-router.delete('/:kodeWPBadan', wajibPajakBadanUsahaController.deleteWPBU);
+router.delete(
+  '/:kodeWajibPajakBadanUsaha',
+  wajibPajakBadanUsahaController.deleteWPBU
+);
 
 export default router;

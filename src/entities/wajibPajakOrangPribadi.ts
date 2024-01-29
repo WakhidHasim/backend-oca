@@ -1,12 +1,11 @@
 export type WajibPajakOrangPribadi = {
-  kodeWPOP: string;
   nama: string;
   email: string;
   kewarganegaraan: string;
   namaNegara: string;
   idOrangPribadi: string;
   namaIdentitas: string;
-  masaBerlakuPassport?: Date;
+  masaBerlakuPassport?: string;
   npwp?: string;
   namaNpwp?: string;
   kotaNpwp?: string;
@@ -19,4 +18,5 @@ export type WajibPajakOrangPribadi = {
   fileFotoIdOrangPribadi: string;
   fileFotoBuktiRekening?: string;
   isApproved: boolean;
+  tanggalInput: string;
 };

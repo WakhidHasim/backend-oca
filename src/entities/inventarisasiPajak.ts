@@ -1,5 +1,4 @@
 export type InventarisasiPajak = {
-  idInventarisasiPajak: string;
   uraianKegiatan: string;
   idKegiatanAnggaran: string;
   nominalDPP: number;
@@ -9,4 +8,5 @@ export type InventarisasiPajak = {
   npwpPemotong?: string;
   namaPemotong?: string;
   idl: string;
+  tanggalInput: string;
 };
