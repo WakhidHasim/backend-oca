@@ -69,13 +69,13 @@ export const createInventarisasiPajak = async (req: Request, res: Response) => {
 
       const file = req.file;
 
-      const formattedDate = moment()
+      const inputDate = moment()
         .tz('Asia/Jakarta')
-        .format('YYYY-MM-DDTHH:mm:ss');
+        .format();
 
       const body: InventarisasiPajak = {
         ...req.body,
-        tanggalInput: formattedDate + '+07:00',
+        tanggalInput: inputDate,
         nominalDPP: Number(req.body?.nominalDPP),
         nominalPajak: Number(req.body?.nominalPajak),
         fileBukti: file.filename,
@@ -104,7 +104,7 @@ export const createInventarisasiPajak = async (req: Request, res: Response) => {
           },
           result: {
             ...inventarisasiPajak,
-            tanggalInput: formattedDate + '+07:00',
+            tanggalInput: inputDate,
           },
         });
       } else {
