@@ -69,13 +69,11 @@ export const createInventarisasiPajak = async (req: Request, res: Response) => {
 
       const file = req.file;
 
-      const formattedDate = moment()
-        .tz('Asia/Jakarta')
-        .format('YYYY-MM-DDTHH:mm:ss');
+      const inputDate = moment().tz('Asia/Jakarta').format();
 
       const body: InventarisasiPajak = {
         ...req.body,
-        tanggalInput: formattedDate + '+07:00',
+        tanggalInput: inputDate,
         nominalDPP: Number(req.body?.nominalDPP),
         nominalPajak: Number(req.body?.nominalPajak),
         fileBukti: file.filename,
@@ -104,7 +102,7 @@ export const createInventarisasiPajak = async (req: Request, res: Response) => {
           },
           result: {
             ...inventarisasiPajak,
-            tanggalInput: formattedDate + '+07:00',
+            tanggalInput: inputDate,
           },
         });
       } else {
@@ -236,20 +234,20 @@ export const updateInventarisasiPajak = async (req: Request, res: Response) => {
 
       const body = req.body;
 
-      const files = req.files as {
-        [fieldname: string]: Express.Multer.File[];
-      };
-
+      const file = req.file;
       let FileBuktiName = getInventarisasiPajakId.fileBukti;
 
-      if (files['fileBukti']?.[0]?.filename) {
-        FileBuktiName = files['fileBukti'][0].filename;
+      if (file?.filename) {
+        FileBuktiName = file.filename;
 
         const filePath = path.join(
-          'public/inventarisasi_pajak/',
+          'public/kegiatan_penghasilan_badan/pph23/invoice',
           getInventarisasiPajakId.fileBukti
         );
-        fs.unlinkSync(filePath);
+
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
       }
 
       const updatedKegiatanOP =

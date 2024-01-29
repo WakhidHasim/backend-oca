@@ -22,10 +22,10 @@ type GetInventarisasiPajakList = {
 export const createInventarisasiPajak = async (
   input: CreateInventarisasiPajakParam
 ) => {
-  const requestBody = input;
+  // const requestBody = createInventarisasiPajakSchema.parse(input);
 
   const pengajuanAnggaran = await prisma.PengajuanAnggaran.findUnique({
-    where: { idKegiatanAnggaran: requestBody.idKegiatanAnggaran },
+    where: { idKegiatanAnggaran: input.idKegiatanAnggaran },
   });
 
   if (!pengajuanAnggaran) {
@@ -33,7 +33,7 @@ export const createInventarisasiPajak = async (
   }
 
   const objekPajak = await prisma.objekPajak.findUnique({
-    where: { kodeObjek: requestBody.kodeObjek },
+    where: { kodeObjek: input.kodeObjek },
   });
 
   if (!objekPajak) {
@@ -41,7 +41,7 @@ export const createInventarisasiPajak = async (
   }
 
   const createdInventarisasiPajak = await prisma.inventarisasiPajak.create({
-    data: requestBody,
+    data: input,
   });
 
   return createdInventarisasiPajak;
