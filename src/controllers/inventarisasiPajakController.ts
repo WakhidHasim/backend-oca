@@ -60,7 +60,7 @@ export const createInventarisasiPajak = async (req: Request, res: Response) => {
   fileBukti(req, res, async (err: any) => {
     try {
       if (err) {
-        return handleFileUploadErrors(err, req, res, () => {});
+        return handleFileUploadErrors(err, req, res, () => { });
       }
 
       if (!req.file) {
@@ -236,20 +236,20 @@ export const updateInventarisasiPajak = async (req: Request, res: Response) => {
 
       const body = req.body;
 
-      const files = req.files as {
-        [fieldname: string]: Express.Multer.File[];
-      };
-
+      const file = req.file
       let FileBuktiName = getInventarisasiPajakId.fileBukti;
 
-      if (files['fileBukti']?.[0]?.filename) {
-        FileBuktiName = files['fileBukti'][0].filename;
+      if (file?.filename) {
+        FileBuktiName = file.filename;
 
         const filePath = path.join(
           'public/kegiatan_penghasilan_badan/pph23/invoice',
-          getInventarisasiPajakId.invoice
+          getInventarisasiPajakId.fileBukti
         );
-        fs.unlinkSync(filePath);
+
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath)
+        }
       }
 
       const updatedKegiatanOP =
