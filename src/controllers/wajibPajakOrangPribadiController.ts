@@ -199,25 +199,32 @@ export const createWPOP = async (req: Request, res: Response) => {
 
 export const wpopList = async (req: Request, res: Response) => {
   try {
-    const queryParameters = req.query;
-    const wpop = await wajibPajakOrangPribadiService.getWPOPList(
-      queryParameters
-    );
+    const { page, limit } = req.query;
+    const pageNumber = parseInt(page as string) || 1;
+    const limitNumber = parseInt(limit as string) || 10;
+
+    const { results, pagination } =
+      await wajibPajakOrangPribadiService.getWPOPList(
+        {},
+        pageNumber,
+        limitNumber
+      );
+
     res.json({
       status: {
         code: 200,
         description: 'OK',
       },
-      result: wpop,
+      result: results,
+      pagination,
     });
   } catch (error: any) {
-    console.log('OK');
     res.status(500).json({
       status: {
         code: 500,
         description: 'Internal Server Error',
       },
-      result: null,
+      result: 'internal server error',
     });
   }
 };

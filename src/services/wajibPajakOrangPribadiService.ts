@@ -40,14 +40,38 @@ export const createWPOP = async (input: CreateWPOPParams) => {
   return craeteWPOP;
 };
 
-export const getWPOPList = async (data: GetWPOPParam) => {
+export const getWPOPList = async (
+  data: GetWPOPParam,
+  page: number,
+  limit: number
+) => {
   const wpop = data;
 
-  return prisma.wajibPajakOrangPribadi.findMany({
+  const take = limit;
+  const skip = (page - 1) * limit;
+  const totalCount = await prisma.wajibPajakOrangPribadi.count();
+  const totalPage = Math.ceil(totalCount / limit);
+  const currentPage = page || 0;
+
+  const results = await prisma.wajibPajakOrangPribadi.findMany({
     where: {
       ...wpop,
     },
+    orderBy: {
+      tanggalInput: 'desc',
+    },
+    skip,
+    take,
   });
+
+  return {
+    results,
+    pagination: {
+      totalCount,
+      totalPage,
+      currentPage,
+    },
+  };
 };
 
 export const getWPOPById = async (kodeWajibPajakOrangPribadi: string) => {

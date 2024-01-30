@@ -7,7 +7,7 @@ type CreateWPBUParam = WajibPajakBadanUsaha;
 type UpdateWPBUParam = WajibPajakBadanUsaha;
 
 type GetWajibPajakBadanUsahaParam = {
-  kodeWPBadan?: string;
+  kodeWajibPajakBadanUsaha?: string;
   namaBadan?: string;
   email?: string;
   npwp?: string;
